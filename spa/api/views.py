@@ -32,6 +32,8 @@ from asgiref.sync import sync_to_async
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
+from .pagination import StandardResultsSetPagination  # Import pagination
+
 logger = logging.getLogger(__name__)
 
 # Base HTML Template - Modern Website with all features
@@ -39,14 +41,27 @@ logger = logging.getLogger(__name__)
 
 class WebsiteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
-    
+    pagination_class = StandardResultsSetPagination  # Pagination ekleyin    
+
     def get_queryset(self):
         return Website.objects.filter(user=self.request.user)
     
     def get_serializer_class(self):
         return WebsiteSerializer
     
+    def list(self, request, *args, **kwargs):
+        """
+        Override list method to ensure pagination is applied
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
     
     @action(detail=False, methods=['post'])
     def analyze_prompt(self, request):

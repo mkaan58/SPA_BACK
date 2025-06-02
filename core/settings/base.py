@@ -146,6 +146,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+
+    'DEFAULT_PAGINATION_CLASS': 'spa.api.pagination.StandardResultsSetPagination',
+    'PAGE_SIZE': 3,
+
 }
 
 # JWT Settings

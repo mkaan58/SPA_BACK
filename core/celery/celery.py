@@ -3,7 +3,7 @@ import os
 from celery import Celery
 
 # Django ayarlarını Celery için varsayılan olarak ayarlayın
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.prod')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.dev')
 
 app = Celery('core')  # Projenizin adını buraya yazın
 
