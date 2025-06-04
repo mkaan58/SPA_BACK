@@ -45,3 +45,6 @@ GITHUB_ACCESS_TOKEN = os.getenv('GITHUB_ACCESS_TOKEN', 'your_github_token_here')
 
 # Vercel Configuration  
 VERCEL_ACCESS_TOKEN = os.getenv('VERCEL_ACCESS_TOKEN', 'your_vercel_token_here')
+
+# UNSPLASH Configuration
+UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY', 'your_unsplash_access_key_here')

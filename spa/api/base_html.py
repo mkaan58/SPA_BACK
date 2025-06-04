@@ -5,7 +5,7 @@ BASE_HTML_TEMPLATE = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modern Website - Base Template</title>
-    <meta name="description" content="Modern responsive website with dark/light theme toggle">
+    <meta name="description" content="Modern responsive website ">
     <meta name="keywords" content="portfolio, modern, responsive, professional">
     
     <!-- Google Fonts -->
@@ -170,21 +170,13 @@ BASE_HTML_TEMPLATE = """
                         <a href="#projects" class="nav-link text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 text-sm font-medium transition-colors">Projects</a>
                         <a href="#contact" class="nav-link text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 text-sm font-medium transition-colors">Contact</a>
                         
-                        <!-- Theme Toggle -->
-                        <button @click="darkMode = !darkMode" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" aria-label="Toggle dark mode">
-                            <i class="fas fa-sun text-yellow-500" x-show="darkMode"></i>
-                            <i class="fas fa-moon text-indigo-600" x-show="!darkMode"></i>
-                        </button>
+ 
                     </div>
                 </div>
                 
                 <!-- Mobile menu button -->
                 <div class="md:hidden flex items-center space-x-2">
-                    <!-- Mobile Theme Toggle -->
-                    <button @click="darkMode = !darkMode" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800" aria-label="Toggle dark mode">
-                        <i class="fas fa-sun text-yellow-500" x-show="darkMode"></i>
-                        <i class="fas fa-moon text-indigo-600" x-show="!darkMode"></i>
-                    </button>
+
                     
                     <button @click="mobileMenuOpen = !mobileMenuOpen" class="hamburger p-2" :class="{ 'active': mobileMenuOpen }" aria-label="Toggle menu">
                         <span></span>

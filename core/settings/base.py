@@ -182,39 +182,89 @@ FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 # settings/base.py dosyanıza ekleyin
 
 # Logging Configuration
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'formatters': {
+#         'verbose': {
+#             'format': '{levelname} {asctime} {module} {message}',
+#             'style': '{',
+#         },
+#         'simple': {
+#             'format': '{levelname} {message}',
+#             'style': '{',
+#         },
+#     },
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'verbose',
+#         },
+#         'file': {
+#             'class': 'logging.FileHandler',
+#             'filename': os.path.join(BASE_DIR, 'debug.log'),
+#             'formatter': 'verbose',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console', 'file'],
+#             'level': 'INFO',
+#         },
+#         'users': {
+#             'handlers': ['console', 'file'],
+#             'level': 'DEBUG',
+#             'propagate': False,
+#         },
+#     },
+# }
+
+
+MCP_SCRIPT_PATH = os.path.join(BASE_DIR, 'spa', 'services', 'mcp_photo_service.py')
+# MCP Configuration
+# USE_MCP_PHOTO_SERVICE = False  # Önce False ile test edin
+USE_FASTMCP_PHOTO_SERVICE = True
+MCP_DEBUG_MODE = True
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'debug.log'),
-            'formatter': 'verbose',
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-        },
-        'users': {
-            'handlers': ['console', 'file'],
+        'spa.services': {
+            'handlers': ['console'],
             'level': 'DEBUG',
-            'propagate': False,
+            'propagate': True,
         },
     },
 }
+MCP_PHOTO_SERVICE_URL = "http://localhost:8080"  # Django serverınızla aynı port
+MCP_PHOTO_SERVICE_TIMEOUT = 30
+MCP_PHOTO_SERVICE_MAX_RETRIES = 3
+MCP_PHOTO_SERVICE_CACHE_TIMEOUT = 3600
+
+# Circuit Breaker Configuration
+MCP_CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5
+MCP_CIRCUIT_BREAKER_RECOVERY_TIMEOUT = 300
+
+# Health Check Configuration
+MCP_HEALTH_CHECK_INTERVAL = 300
+
+# Cache Configuration (Redis önerilir)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'KEY_PREFIX': 'spa_images',
+        'TIMEOUT': 3600,
+    }
+}
+
+os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
+UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY', 'your_unsplash_access_key_here')
