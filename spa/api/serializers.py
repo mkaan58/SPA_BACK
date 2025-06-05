@@ -11,7 +11,7 @@ class WebsiteSerializer(serializers.ModelSerializer):
             'id', 'title', 'prompt', 'html_content','contact_email',
             'primary_color', 'secondary_color', 'accent_color', 'background_color',
             'theme', 'heading_font', 'body_font', 'corner_radius',
-             'created_at', 'updated_at'
+             'created_at', 'updated_at', 'custom_styles', 'element_contents'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
     
@@ -36,10 +36,18 @@ class WebsiteCreateSerializer(serializers.ModelSerializer):
             'theme', 'heading_font', 'body_font', 'corner_radius'
         ]
 
+
     def create(self, validated_data):
         prompt_text = validated_data['prompt']
-        words = prompt_text.split()
-        title = ' '.join(words[:5]) + '...' if len(words) > 5 else prompt_text
+        
+        # ✅ Enhanced prompt kontrolü
+        if prompt_text.startswith(('APPROVED DESIGN PLAN:', '**APPROVED DESIGN PLAN:')):
+            # Enhanced prompt'tan original'i çıkarmaya çalış
+            title = self._extract_title_from_enhanced_prompt(prompt_text)
+        else:
+            # Normal prompt
+            words = prompt_text.split()
+            title = ' '.join(words[:5]) + '...' if len(words) > 5 else prompt_text
 
         return Website(
             user=self.context['request'].user,
@@ -56,6 +64,40 @@ class WebsiteCreateSerializer(serializers.ModelSerializer):
             body_font=validated_data.get('body_font', ''),
             corner_radius=validated_data.get('corner_radius', 8)
         )
+
+    def _extract_title_from_enhanced_prompt(self, enhanced_prompt):
+        """Enhanced prompt'tan anlamlı title çıkar"""
+        try:
+            # "ORIGINAL USER REQUEST:" kısmını bul
+            if "ORIGINAL USER REQUEST:" in enhanced_prompt:
+                lines = enhanced_prompt.split('\n')
+                for i, line in enumerate(lines):
+                    if "ORIGINAL USER REQUEST:" in line and i + 1 < len(lines):
+                        original = lines[i + 1].strip()
+                        if original and not original.startswith(('APPROVED', 'BASE', '🖼️', '🎯')):
+                            words = original.split()
+                            return ' '.join(words[:5]) + '...' if len(words) > 5 else original
+            
+            # Plan içinden business type çıkarmaya çalış
+            business_indicators = {
+                'restaurant': 'Restaurant Website',
+                'portfolio': 'Portfolio Website', 
+                'business': 'Business Website',
+                'photography': 'Photography Portfolio',
+                'consulting': 'Consulting Website',
+                'shop': 'Shop Website',
+                'blog': 'Blog Website'
+            }
+            
+            prompt_lower = enhanced_prompt.lower()
+            for keyword, title in business_indicators.items():
+                if keyword in prompt_lower:
+                    return title
+                    
+            # Fallback
+            return "AI Generated Website"
+        except:
+            return "Generated Website"
 
 class UploadedImageSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
@@ -91,3 +133,11 @@ class AnalyzePromptSerializer(serializers.Serializer):
 
 class UpdatePlanSerializer(serializers.Serializer):
     feedback = serializers.CharField()
+
+
+# serializers.py - Yeni serializer ekle
+class ElementStyleSerializer(serializers.Serializer):
+    element_selector = serializers.CharField(max_length=100)
+    property = serializers.CharField(max_length=50)
+    value = serializers.CharField(max_length=200)
+    element_id = serializers.CharField(max_length=100, required=False)

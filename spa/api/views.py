@@ -223,6 +223,7 @@ DESIGN PREFERENCES:
 
 Create a detailed design plan in the following format:
 
+#Project Name: [General definition of the project, e.g. "Modern Portfolio Website"]
 # 🎨 Website Design Plan
 
 ## 📋 Project Summary
@@ -713,7 +714,41 @@ These are ACTUAL Unsplash photos (not placeholders) selected for your specific b
 
 🎯 CRITICAL MISSION: Create a website exactly as described in the approved design plan with PERFECT visual accessibility and color harmony.
 
+✅ MANDATORY: All cards in the same section MUST have identical heights using CSS grid or flexbox, ensuring all text remains fully readable without truncation.
 ## 🧬 SCIENTIFICALLY CALCULATED COLOR SYSTEM
+
+/* 🔴 CRITICAL: UNIFORM CARD HEIGHT SYSTEM */
+.card-container 
+  display: flex !important;
+  align-items: stretch !important;
+
+
+.card 
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+
+
+.card-body 
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+
+
+/* Grid containers for equal heights */
+.portfolio-grid, .services-grid, .team-grid 
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+  gap: 24px !important;
+  align-items: stretch !important;
+
+
+@media (max-width: 768px) 
+  .portfolio-grid, .services-grid, .team-grid 
+    grid-template-columns: 1fr !important;
+  
+
 
 ### WCAG AAA COMPLIANT COLOR PALETTE:
 The following colors have been automatically calculated for maximum readability and visual harmony:
@@ -2000,3 +2035,82 @@ Deliver only clean HTML code starting with <!DOCTYPE html>. No markdown, no expl
             return Response({
                 'error': f"Failed to update website HTML: {str(e)}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    @action(detail=True, methods=['post'])
+    def update_element_style(self, request, pk=None):
+        """Tek element stil güncelleme - CSS çakışması olmadan"""
+        website = self.get_object()
+        
+        try:
+            element_selector = request.data.get('element_selector')
+            property_name = request.data.get('property')
+            value = request.data.get('value')
+            element_id = request.data.get('element_id', f'custom-{timezone.now().timestamp()}')
+            
+            # Custom styles JSON'ını güncelle
+            custom_styles = website.custom_styles or {}
+            
+            if element_id not in custom_styles:
+                custom_styles[element_id] = {}
+            
+            custom_styles[element_id][property_name] = value
+            
+            # Website'e kaydet
+            website.custom_styles = custom_styles
+            website.save(update_fields=['custom_styles'])
+            
+            logger.info(f"Style updated: {element_id} -> {property_name}: {value}")
+            
+            return Response({
+                'success': True,
+                'element_id': element_id,
+                'property': property_name,
+                'value': value
+            })
+            
+        except Exception as e:
+            logger.error(f"Style update error: {str(e)}")
+            return Response({
+                'error': f"Style update failed: {str(e)}"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=True, methods=['post'])
+    def update_element_content(self, request, pk=None):
+        """Text content güncelleme endpoint'i"""
+        website = self.get_object()
+        
+        try:
+            element_id = request.data.get('element_id')
+            content = request.data.get('content', '')
+            
+            # Element content mapping'ini tut
+            element_contents = getattr(website, 'element_contents', {})
+            if isinstance(element_contents, str):
+                element_contents = json.loads(element_contents)
+            
+            element_contents[element_id] = content
+            
+            # Website'e kaydet (yeni alan gerekebilir)
+            website.element_contents = element_contents
+            website.save(update_fields=['element_contents'])
+            
+            logger.info(f"Content updated: {element_id} -> {content[:50]}...")
+            
+            return Response({
+                'success': True,
+                'element_id': element_id,
+                'content': content
+            })
+            
+        except Exception as e:
+            logger.error(f"Content update error: {str(e)}")
+            return Response({
+                'error': f"Content update failed: {str(e)}"
+            }, status=status.HTTP_400_BAD_REQUEST)
+  
+    @action(detail=True, methods=['get'])
+    def preview_with_styles(self, request, pk=None):
+        """Custom styles ile preview - sadece görüntüleme için"""
+        website = self.get_object()
+        html_content = website.apply_all_customizations_safe()  # Safe version
+        return Response({'html_content': html_content})
