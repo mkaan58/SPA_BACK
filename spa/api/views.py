@@ -118,7 +118,130 @@ class EnhancedImageService:
                 logger.error(f"❌ Fallback also failed: {fallback_error}")
                 return self._get_emergency_fallback()
     
+    async def _generate_from_dynamic_requirements(self, requirements: Dict, user_preferences: Dict) -> Dict:
+        """Dynamic sections'a göre image generation"""
+        
+        enhanced_preferences = {
+            **(user_preferences or {}),
+            "requirements": requirements,
+            "business_type": requirements["business_type"],
+            "total_images_needed": requirements["total_images_needed"],
+            "detected_sections": list(requirements["sections"].keys())
+        }
+        
+        # Dynamic section requirements
+        section_requirements = []
+        for section_name, section_data in requirements["sections"].items():
+            section_requirements.append({
+                "section_name": section_name,
+                "image_count": section_data["count"],
+                "keywords": section_data["keywords"],
+                "description": section_data["description"],
+                "image_purpose": f"{section_name} section for {requirements['business_type']}",
+                "required_mood": self._get_mood_for_section(section_name),
+                "dimensions": self._get_dynamic_dimensions(section_name)
+            })
+        
+        logger.info(f"🎯 Generating images for {len(section_requirements)} dynamic sections")
+        
+        return await self.fastmcp_service.get_context_aware_photos(
+            design_plan="Dynamic sections from parsed design plan",
+            user_preferences=enhanced_preferences,
+            section_requirements=section_requirements
+        )
 
+    async def _generate_fallback_from_dynamic_requirements(self, requirements: Dict) -> Dict:
+        """Dynamic fallback generation"""
+        
+        images = {}
+        business_type = requirements["business_type"]
+        
+        for section_name, section_data in requirements["sections"].items():
+            count = section_data["count"]
+            keywords = section_data["keywords"]
+            
+            if count > 1:
+                # Multiple images için
+                for i in range(1, count + 1):
+                    key = f"{section_name}_{i}"
+                    # Variation için farklı queries
+                    variation_keywords = [
+                        "modern", "professional", "clean", "elegant", 
+                        "innovative", "creative", "quality", "premium"
+                    ]
+                    variation = variation_keywords[i % len(variation_keywords)]
+                    specific_query = f"{keywords} {variation}"
+                    
+                    images[key] = self.fallback_service._get_unsplash_image(specific_query)
+                    logger.info(f"📸 {key}: {specific_query}")
+            else:
+                # Single image
+                key = f"{section_name}_image"
+                images[key] = self.fallback_service._get_unsplash_image(keywords)
+                logger.info(f"📸 {key}: {keywords}")
+        
+        logger.info(f"✅ Dynamic fallback: {len(images)} images for {len(requirements['sections'])} sections")
+        return images
+
+    def _validate_dynamic_requirements(self, images: Dict, requirements: Dict) -> bool:
+        """Dynamic sections için validation"""
+        
+        validation_passed = True
+        
+        for section_name, section_data in requirements["sections"].items():
+            expected_count = section_data["count"]
+            
+            if expected_count > 1:
+                # Multiple images check
+                section_images = [k for k in images.keys() if k.startswith(f"{section_name}_")]
+                actual_count = len(section_images)
+            else:
+                # Single image check
+                actual_count = 1 if f"{section_name}_image" in images else 0
+            
+            if actual_count != expected_count:
+                logger.error(f"❌ {section_name} mismatch: expected {expected_count}, got {actual_count}")
+                validation_passed = False
+            else:
+                logger.info(f"✅ {section_name}: {actual_count} images ✓")
+        
+        total_expected = requirements["total_images_needed"]
+        total_actual = len(images)
+        
+        logger.info(f"📊 Total validation: {total_actual}/{total_expected} images")
+        
+        return validation_passed
+    def _get_mood_for_section(self, section_name: str) -> str:
+        """Section'a göre mood belirleme"""
+        mood_map = {
+            'hero': 'inspiring professional bold',
+            'about': 'authentic warm personal',
+            'portfolio': 'creative professional showcase',
+            'services': 'clean professional reliable',
+            'team': 'friendly professional collaborative',
+            'testimonials': 'trustworthy authentic satisfied',
+            'gallery': 'creative diverse showcase',
+            'contact': 'welcoming accessible professional',
+            'blog': 'engaging informative modern',
+            'features': 'clear beneficial solution-focused'
+        }
+        return mood_map.get(section_name, 'professional modern')
+
+    def _get_dynamic_dimensions(self, section_name: str) -> str:
+        """Section'a göre dynamic dimensions"""
+        dimension_map = {
+            'hero': '1920x1080',
+            'about': '600x400',
+            'portfolio': '600x400',
+            'services': '400x300',
+            'team': '400x400',
+            'testimonials': '300x300',
+            'gallery': '600x400',
+            'contact': '800x500',
+            'blog': '600x350',
+            'features': '400x300'
+        }
+        return dimension_map.get(section_name, '600x400')
     
     def _get_emergency_fallback(self) -> Dict:
         """Acil durum fallback"""
@@ -130,6 +253,30 @@ class EnhancedImageService:
             'portfolio_3': 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&h=400&fit=crop',
             'service_image': 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=500&fit=crop'
         }
+
+    def _extract_section_requirements(self, design_plan: str) -> List[Dict]:
+        """Design plan'dan section requirements çıkar"""
+        sections = []
+        
+        common_sections = {
+            "hero": {"purpose": "main attraction", "mood": "inspiring", "dimensions": "1920x1080"},
+            "about": {"purpose": "personal connection", "mood": "authentic", "dimensions": "400x400"},
+            "portfolio": {"purpose": "showcase work", "mood": "professional", "dimensions": "600x400"},
+            "services": {"purpose": "service presentation", "mood": "clean", "dimensions": "800x500"},
+            "contact": {"purpose": "accessibility", "mood": "welcoming", "dimensions": "600x300"}
+        }
+        
+        for section_name, defaults in common_sections.items():
+            if section_name.lower() in design_plan.lower():
+                sections.append({
+                    "section_name": section_name,
+                    "image_purpose": defaults["purpose"],
+                    "required_mood": defaults["mood"],
+                    "dimensions": defaults["dimensions"]
+                })
+        
+        return sections
+
 
 class WebsiteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -155,28 +302,6 @@ class WebsiteViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
     
-    def _extract_section_requirements(self, design_plan: str) -> List[Dict]:
-        """Design plan'dan section requirements çıkar"""
-        sections = []
-        
-        common_sections = {
-            "hero": {"purpose": "main attraction", "mood": "inspiring", "dimensions": "1920x1080"},
-            "about": {"purpose": "personal connection", "mood": "authentic", "dimensions": "400x400"},
-            "portfolio": {"purpose": "showcase work", "mood": "professional", "dimensions": "600x400"},
-            "services": {"purpose": "service presentation", "mood": "clean", "dimensions": "800x500"},
-            "contact": {"purpose": "accessibility", "mood": "welcoming", "dimensions": "600x300"}
-        }
-        
-        for section_name, defaults in common_sections.items():
-            if section_name.lower() in design_plan.lower():
-                sections.append({
-                    "section_name": section_name,
-                    "image_purpose": defaults["purpose"],
-                    "required_mood": defaults["mood"],
-                    "dimensions": defaults["dimensions"]
-                })
-        
-        return sections
 
     def _validate_fastmcp_images(self, images: Dict) -> bool:
         """FastMCP images doğrula"""
@@ -535,12 +660,15 @@ UPDATED PLAN:
                     
                     # Async FastMCP çağrısı
                     context_images = asyncio.run(
-                        context_aware_photo_service.get_context_aware_photos(
-                            design_plan=design_plan.current_plan,
-                            user_preferences=user_preferences,
-                            section_requirements=self._extract_section_requirements(design_plan.current_plan)
-                        )
-                    )
+                      context_aware_photo_service.get_context_aware_photos(
+                          design_plan=design_plan.current_plan,  # FULL design plan gönder
+                          user_preferences=user_preferences,
+                          section_requirements=[]  # FastMCP kendi parse edecek
+                      )
+                  )
+                    if not context_images:
+                        logger.error("❌ FastMCP returned None or empty images")
+                        context_images = self._get_emergency_unsplash_images(design_plan.original_prompt)
                     
                     # FastMCP validation
                     if self._validate_fastmcp_images(context_images):
