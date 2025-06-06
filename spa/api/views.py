@@ -523,9 +523,11 @@ Do you like this plan? Would you like to change, add, or remove any sections?
             
             response = client.models.generate_content(
                 model="gemini-2.5-flash-preview-05-20",
+                # model="gemini-2.5-pro-preview-06-05",
                 contents=contents,
                 config=generate_content_config,
             )
+            
             
             design_plan = WebsiteDesignPlan.objects.create(
                 user=request.user,
@@ -594,6 +596,7 @@ UPDATED PLAN:
             
             response = client.models.generate_content(
                 model="gemini-2.5-flash-preview-05-20",
+                # model="gemini-2.5-pro-preview-06-05",
                 contents=contents,
                 config=types.GenerateContentConfig(response_mime_type="text/plain"),
             )
@@ -1919,11 +1922,11 @@ Before delivering the HTML, ensure:
 5. ✅ All hover states provide clear feedback
 6. ✅ All forms are functional with proper validation
 7. ✅ Navigation works on mobile and desktop
-8. ✅ Contact form uses EmailJS exactly as in BASE_HTML_TEMPLATE, MAKE SURE you've added contact form in website.
+8. ✅ Contact form uses EmailJS exactly as in BASE_HTML_TEMPLATE, MAKE SURE you've added contact form in website.Whatever user says about contact form dont care, just be attached into BASE_HTML_TEMPLATE contact form !!!!!
 9. ✅ Responsive design works on all screen sizes
 10. ✅ Professional, modern, and accessible appearance
 11. ✅ **NEW:** Swiper sliders work on touch devices
-12. ✅ **NEW:** Typed.js animations are smooth and professional
+12. ✅ **NEW:** Typed.js animations are smooth and professional. Make sure Typed.js animations dont cause problems with layout shifts or horizontal scrolling on mobile and desktop
 13. ✅ **NEW:** Particles.js effects are subtle and performance-optimized
 14. ✅ **NEW:** All advanced features are mobile-responsive
 15. ✅ **NEW:** Accessibility preferences are respected (reduced motion)
@@ -1971,6 +1974,7 @@ Deliver only clean HTML code starting with <!DOCTYPE html>. No markdown, no expl
             
             response = client.models.generate_content(
                 model="gemini-2.5-flash-preview-05-20",
+                # model="gemini-2.5-pro-preview-06-05",
                 contents=contents,
                 config=generate_content_config,
             )
