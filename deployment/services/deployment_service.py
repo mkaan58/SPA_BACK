@@ -246,7 +246,6 @@ class DeploymentService:
             
         except Exception as e:
             raise Exception(f"Failed to upload website content: {str(e)}")
-    
     def _create_or_update_vercel_project(self, website: Website, github_repo: GitHubRepository) -> VercelDeployment:
         """Vercel projesi oluştur/güncelle - Status düzeltilmiş"""
         try:
@@ -267,6 +266,14 @@ class DeploymentService:
                 
                 # Environment variables'ları güncelle
                 self._update_project_environment_variables(existing_deployment.project_id, website)
+                
+                # ✅ Authentication'ı devre dışı bırak
+                try:
+                    self.vercel.disable_project_authentication(existing_deployment.project_id)
+                    logger.info(f"✅ Authentication disabled for existing project: {existing_deployment.project_id}")
+                except:
+                    logger.warning("⚠️ Could not disable authentication, continuing...")
+                
                 return existing_deployment
             else:
                 # ✅ Yeni deployment oluştur - Status açıkça set et
@@ -292,13 +299,18 @@ class DeploymentService:
                 # Environment variables set et
                 self._setup_project_environment_variables(project_data['id'], website)
                 
+                # ✅ Authentication'ı devre dışı bırak
+                try:
+                    self.vercel.disable_project_authentication(project_data['id'])
+                    logger.info(f"✅ Authentication disabled for new project: {project_data['id']}")
+                except:
+                    logger.warning("⚠️ Could not disable authentication, continuing...")
+                
                 return deployment
                 
         except Exception as e:
             logger.exception(f"❌ Failed to create Vercel project: {str(e)}")
             raise Exception(f"Failed to create Vercel project: {str(e)}")
-        
-
 
     def _trigger_deployment(self, vercel_deployment: VercelDeployment, file_shas: Dict) -> VercelDeployment:
         """Doğru endpoint ile deployment tetikler - Status update düzeltilmiş"""

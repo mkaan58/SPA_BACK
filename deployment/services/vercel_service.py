@@ -41,6 +41,31 @@ class VercelService:
         else:
             raise Exception(f"Failed to create Vercel project: {response.text}")
         
+    def disable_project_authentication(self, project_id: str):
+        """Vercel projesinin authentication'ını devre dışı bırakır"""
+        url = f"{self.base_url}/v9/projects/{project_id}"
+        
+        # Önce mevcut project bilgilerini al
+        get_response = requests.get(url, headers=self.headers)
+        if get_response.status_code != 200:
+            return False
+            
+        project_data = get_response.json()
+        
+        # ssoProtection'ı null yap
+        project_data['ssoProtection'] = None
+        
+        # Project'i güncelle
+        response = requests.patch(url, headers=self.headers, json={
+            "ssoProtection": None
+        })
+        
+        print(f"Disable Auth Response: Status={response.status_code}, Body={response.text}")
+        
+        if response.status_code in [200, 201]:
+            return True
+        return False
+
     def trigger_deployment(self, project_id: str, project_name: str, file_shas: Dict = None) -> Dict:
         """Git-based deployment tetikler (DOĞRU ENDPOINT)"""
         # DOĞRU ENDPOINT - project_id URL'de değil, body'de

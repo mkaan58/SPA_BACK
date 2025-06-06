@@ -20,7 +20,7 @@ from .serializers import (
     UpdatePlanSerializer
 )
 from rest_framework.parsers import MultiPartParser, FormParser
-from .base_html import BASE_HTML_TEMPLATE
+from .base_html_2 import BASE_HTML_TEMPLATE
 import time
 
 from playwright.async_api import async_playwright
@@ -1331,6 +1331,8 @@ button:hover,
 ## 🚀 ADVANCED INTERACTIVE FEATURES - NEW CDN INTEGRATIONS
 
 ### 1. SWIPER.JS IMPLEMENTATION (PREMIUM SLIDERS & CAROUSELS)
+
+🎯 SWIPER.JS CRITICAL OPTIMIZATIONS: Ensure Swiper sliders use proper breakpoints (320px: 1 slide, 640px: 2 slides, 1024px: 3 slides), enable touch gestures with smooth transitions, implement dynamic pagination bullets, and hide navigation arrows on mobile devices. Always test slider responsiveness and ensure smooth performance on all devices with proper autoplay settings.
 
 **MANDATORY CDN SETUP:**
 ```html
