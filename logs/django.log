@@ -1,0 +1,400 @@
+INFO 2025-06-07 00:38:28,213 autoreload 12708 10528 Watching for file changes with StatReloader
+INFO 2025-06-07 00:39:05,345 autoreload 12708 10528 C:\Users\KAAN\Desktop\core\spa\api\views.py changed, reloading.
+INFO 2025-06-07 00:39:07,209 autoreload 1096 15192 Watching for file changes with StatReloader
+INFO 2025-06-07 00:39:38,364 basehttp 1096 2088 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 00:39:38,375 basehttp 1096 2088 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 00:39:38,443 basehttp 1096 2088 "GET /api/spa/websites/?page=1&page_size=3 HTTP/1.1" 200 503736
+INFO 2025-06-07 00:39:38,515 basehttp 1096 1244 "GET /api/spa/websites/?page=1&page_size=3 HTTP/1.1" 200 503736
+INFO 2025-06-07 00:41:10,858 autoreload 1096 15192 C:\Users\KAAN\Desktop\core\core\settings\base.py changed, reloading.
+INFO 2025-06-07 00:41:13,051 autoreload 24952 24220 Watching for file changes with StatReloader
+INFO 2025-06-07 00:43:23,508 autoreload 25500 7760 Watching for file changes with StatReloader
+INFO 2025-06-07 00:44:42,782 basehttp 25500 24424 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 00:44:42,806 basehttp 25500 24424 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 00:44:45,511 basehttp 25500 21632 "OPTIONS /api/users/logout/ HTTP/1.1" 200 0
+INFO 2025-06-07 00:44:45,515 basehttp 25500 24424 "POST /api/users/logout/ HTTP/1.1" 200 38
+WARNING 2025-06-07 00:44:45,599 log 25500 24424 Unauthorized: /api/users/me/
+WARNING 2025-06-07 00:44:45,601 basehttp 25500 24424 "GET /api/users/me/ HTTP/1.1" 401 58
+WARNING 2025-06-07 00:44:45,604 log 25500 24424 Unauthorized: /api/users/me/
+WARNING 2025-06-07 00:44:45,605 basehttp 25500 24424 "GET /api/users/me/ HTTP/1.1" 401 58
+WARNING 2025-06-07 00:44:45,613 log 25500 24424 Bad Request: /api/users/token/refresh/
+WARNING 2025-06-07 00:44:45,615 log 25500 2484 Bad Request: /api/users/token/refresh/
+WARNING 2025-06-07 00:44:45,615 basehttp 25500 24424 "POST /api/users/token/refresh/ HTTP/1.1" 400 34
+WARNING 2025-06-07 00:44:45,616 basehttp 25500 2484 "POST /api/users/token/refresh/ HTTP/1.1" 400 34
+INFO 2025-06-07 00:44:49,824 basehttp 25500 2484 "POST /api/users/google/ HTTP/1.1" 200 741
+INFO 2025-06-07 00:44:49,854 basehttp 25500 2484 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 00:44:49,861 basehttp 25500 24424 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 00:45:14,326 basehttp 25500 21632 "OPTIONS /api/spa/websites/analyze_prompt/ HTTP/1.1" 200 0
+INFO 2025-06-07 00:45:56,940 basehttp 25500 24424 "POST /api/spa/websites/analyze_prompt/ HTTP/1.1" 201 15696
+INFO 2025-06-07 00:46:03,904 basehttp 25500 21632 "OPTIONS /api/spa/websites/approve-plan/94/ HTTP/1.1" 200 0
+ERROR 2025-06-07 00:46:03,923 log 25500 24424 Internal Server Error: /api/spa/websites/approve-plan/94/
+ERROR 2025-06-07 00:46:03,924 basehttp 25500 24424 "POST /api/spa/websites/approve-plan/94/ HTTP/1.1" 500 127
+INFO 2025-06-07 00:50:21,602 autoreload 19080 24848 Watching for file changes with StatReloader
+INFO 2025-06-07 00:50:47,830 basehttp 19080 17064 "POST /api/spa/websites/approve-plan/94/ HTTP/1.1" 202 188
+INFO 2025-06-07 00:50:55,785 fastmcp_photo_service 22840 15644    Business Type: bakery
+INFO 2025-06-07 00:50:55,785 fastmcp_photo_service 22840 15644    Total Images: 15
+INFO 2025-06-07 00:50:55,786 fastmcp_photo_service 22840 15644    Sections: ['hero', 'about', 'menu_featured_items', 'gallery', 'testimonials']
+INFO 2025-06-07 00:51:43,411 fastmcp_photo_service 22840 15644    1: Signature tiered cake floral delicate presentation
+INFO 2025-06-07 00:51:43,412 fastmcp_photo_service 22840 15644    2: Warm artisanal bread golden crust kitchen
+INFO 2025-06-07 00:51:43,412 fastmcp_photo_service 22840 15644    3: Vibrant fruit tarts glistening bakery display
+INFO 2025-06-07 00:51:43,412 fastmcp_photo_service 22840 15644    4: Assorted delicious desserts cozy bakery counter
+INFO 2025-06-07 00:51:43,413 fastmcp_photo_service 22840 15644    5: Flaky croissant golden brown close-up texture
+INFO 2025-06-07 00:51:43,413 fastmcp_photo_service 22840 15644    6: Fresh pastries morning light bakery window
+INFO 2025-06-07 00:52:22,242 autoreload 10292 20944 Watching for file changes with StatReloader
+INFO 2025-06-07 00:52:30,822 basehttp 10292 19968 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 00:52:30,828 basehttp 10292 19968 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 00:53:18,365 basehttp 10292 19968 "POST /api/spa/websites/analyze_prompt/ HTTP/1.1" 201 12899
+INFO 2025-06-07 00:53:20,480 basehttp 10292 22880 "OPTIONS /api/spa/websites/approve-plan/95/ HTTP/1.1" 200 0
+INFO 2025-06-07 00:53:20,560 basehttp 10292 19968 "POST /api/spa/websites/approve-plan/95/ HTTP/1.1" 202 188
+INFO 2025-06-07 00:53:30,052 fastmcp_photo_service 23396 3492    Business Type: bakery
+INFO 2025-06-07 00:53:30,052 fastmcp_photo_service 23396 3492    Total Images: 6
+INFO 2025-06-07 00:53:30,052 fastmcp_photo_service 23396 3492    Sections: ['hero', 'about', 'menu_featured_items', 'gallery', 'testimonials']
+INFO 2025-06-07 00:54:32,414 fastmcp_photo_service 23396 3492    1: Warm artisan sourdough crust texture close-up
+INFO 2025-06-07 00:54:32,414 fastmcp_photo_service 23396 3492    2: Elegant French pastries display warm glow
+INFO 2025-06-07 00:54:32,414 fastmcp_photo_service 23396 3492    3: Rustic bakery counter sunlight, vintage details
+INFO 2025-06-07 00:54:32,414 fastmcp_photo_service 23396 3492    4: Ornate custom cake frosting detail, macro
+INFO 2025-06-07 00:56:02,577 autoreload 10292 20944 C:\Users\KAAN\Desktop\core\spa\tasks.py changed, reloading.
+INFO 2025-06-07 00:56:04,748 autoreload 1536 14116 Watching for file changes with StatReloader
+INFO 2025-06-07 00:57:05,642 basehttp 1536 9048 "GET /api/spa/websites/?page=1&page_size=3 HTTP/1.1" 200 503736
+INFO 2025-06-07 00:57:05,679 basehttp 1536 9048 "GET /api/spa/websites/?page=1&page_size=3 HTTP/1.1" 200 503736
+INFO 2025-06-07 01:03:08,302 basehttp 1536 15680 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 01:03:08,308 basehttp 1536 15680 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 01:03:47,427 basehttp 1536 15680 "POST /api/spa/websites/analyze_prompt/ HTTP/1.1" 201 14803
+INFO 2025-06-07 01:03:49,645 basehttp 1536 25416 "OPTIONS /api/spa/websites/approve-plan/96/ HTTP/1.1" 200 0
+INFO 2025-06-07 01:03:49,731 basehttp 1536 15680 "POST /api/spa/websites/approve-plan/96/ HTTP/1.1" 202 188
+INFO 2025-06-07 01:03:49,737 basehttp 1536 25416 "OPTIONS /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 0
+INFO 2025-06-07 01:03:49,772 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:03:51,782 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:03:54,272 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:03:56,282 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:03:58,296 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:00,890 fastmcp_photo_service 1032 9336    Business Type: bakery
+INFO 2025-06-07 01:04:00,891 fastmcp_photo_service 1032 9336    Total Images: 9
+INFO 2025-06-07 01:04:00,891 fastmcp_photo_service 1032 9336    Sections: ['hero', 'about', 'featured_menu_items', 'gallery', 'testimonials']
+INFO 2025-06-07 01:04:01,273 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:03,446 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:05,455 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:07,470 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:09,484 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:11,521 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:13,533 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:16,275 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:18,291 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:21,272 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:24,270 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:26,281 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:29,271 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:32,275 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:35,271 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:38,278 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:40,289 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:43,271 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:46,273 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:48,311 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:50,321 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:53,267 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:54,779 fastmcp_photo_service 1032 9336    1: Gooey chocolate chip cookies stacked rustic
+INFO 2025-06-07 01:04:54,779 fastmcp_photo_service 1032 9336    2: Artisan baker shaping golden baguette
+INFO 2025-06-07 01:04:54,779 fastmcp_photo_service 1032 9336    3: Vibrant fruit tart cozy bakery display
+INFO 2025-06-07 01:04:55,276 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:04:58,271 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:01,031 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:03,147 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:05,159 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:07,173 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:09,186 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:11,275 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:14,270 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:17,272 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:19,290 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:21,298 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:23,312 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:26,273 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:28,755 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:31,273 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:33,284 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:36,269 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:39,273 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:42,283 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:45,268 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:47,671 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:48,083 fastmcp_photo_service 1032 9336    1: Elegant tiered cakes dessert display vintage
+INFO 2025-06-07 01:05:48,084 fastmcp_photo_service 1032 9336    2: Rustic sourdough loaves cooling rack softlight
+INFO 2025-06-07 01:05:48,084 fastmcp_photo_service 1032 9336    3: Cozy bakery patrons enjoying coffee pastries
+INFO 2025-06-07 01:05:48,084 fastmcp_photo_service 1032 9336    4: Vibrant berry tart close-up fresh fruit
+INFO 2025-06-07 01:05:49,688 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:52,262 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:54,271 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:05:57,268 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:00,274 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:02,285 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:04,299 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:07,271 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:09,283 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:11,292 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:14,264 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:16,285 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:19,266 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:22,276 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:25,267 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:27,277 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:30,266 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:32,279 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:34,684 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:36,696 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:38,709 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:41,277 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:43,331 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:45,904 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:48,276 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:51,273 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:54,273 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:57,261 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:06:59,272 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:02,276 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:05,263 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:07,273 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:10,269 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:12,280 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:15,271 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:18,275 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:21,270 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:24,264 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:27,269 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:30,277 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:32,288 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:35,263 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:38,270 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:41,279 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:44,275 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:07:47,268 basehttp 1536 15680 "GET /api/spa/websites/task-status/134f393f-3f57-4a1f-b144-ab93696e5767/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:14:44,438 autoreload 17828 5796 Watching for file changes with StatReloader
+INFO 2025-06-07 01:15:23,880 basehttp 17828 25064 "POST /api/users/google/ HTTP/1.1" 200 741
+INFO 2025-06-07 01:15:23,911 basehttp 17828 25064 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 01:15:23,917 basehttp 17828 13468 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 01:16:14,231 basehttp 17828 13468 "POST /api/spa/websites/analyze_prompt/ HTTP/1.1" 201 15301
+INFO 2025-06-07 01:16:33,871 basehttp 17828 7760 "OPTIONS /api/spa/websites/approve-plan/97/ HTTP/1.1" 200 0
+INFO 2025-06-07 01:16:33,958 basehttp 17828 13468 "POST /api/spa/websites/approve-plan/97/ HTTP/1.1" 202 188
+INFO 2025-06-07 01:16:33,964 basehttp 17828 7760 "OPTIONS /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 0
+INFO 2025-06-07 01:16:33,969 fastmcp_photo_service 6852 1636 Starting FAST context-aware photo generation...
+INFO 2025-06-07 01:16:33,969 fastmcp_photo_service 6852 1636 Detected business type: bakery
+INFO 2025-06-07 01:16:33,970 fastmcp_photo_service 6852 1636 Using FAST method (no AI verification)
+INFO 2025-06-07 01:16:33,970 fastmcp_photo_service 6852 1636 Using fast photo retrieval method
+INFO 2025-06-07 01:16:33,971 fastmcp_photo_service 6852 1636 Searching Unsplash: 'bakery bakery hero main' (page 2)
+INFO 2025-06-07 01:16:33,971 fastmcp_photo_service 6852 1636 Searching Unsplash: 'bakery bakery team story' (page 2)
+INFO 2025-06-07 01:16:33,971 fastmcp_photo_service 6852 1636 Searching Unsplash: 'bakery bakery bread pastries' (page 3)
+INFO 2025-06-07 01:16:33,972 fastmcp_photo_service 6852 1636 Searching Unsplash: 'bakery bakery gallery showcase' (page 3)
+INFO 2025-06-07 01:16:33,972 fastmcp_photo_service 6852 1636 Searching Unsplash: 'bakery bakery location storefront' (page 1)
+INFO 2025-06-07 01:16:33,977 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:16:34,431 fastmcp_photo_service 6852 1636 Found 2 photos for query: bakery bakery team story
+INFO 2025-06-07 01:16:34,434 fastmcp_photo_service 6852 1636 Found 2 photos for query: bakery bakery gallery showcase
+INFO 2025-06-07 01:16:34,471 fastmcp_photo_service 6852 1636 Found 2 photos for query: bakery bakery location storefront
+INFO 2025-06-07 01:16:34,495 fastmcp_photo_service 6852 1636 Found 2 photos for query: bakery bakery bread pastries
+INFO 2025-06-07 01:16:34,497 fastmcp_photo_service 6852 1636 Found 2 photos for query: bakery bakery hero main
+INFO 2025-06-07 01:16:36,278 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:16:39,275 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:16:42,270 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:16:45,274 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:16:48,272 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:16:50,661 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:16:53,271 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:16:56,265 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:16:58,286 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:01,277 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:04,291 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:07,264 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:09,685 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:12,274 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:15,266 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:18,270 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:21,274 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:24,269 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:26,281 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:29,263 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:31,272 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:34,271 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:36,283 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:39,270 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:41,279 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:43,288 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:46,271 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:49,291 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:52,278 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:55,273 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:17:58,276 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:01,276 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:04,273 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:07,272 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:09,839 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:12,277 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:15,273 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:17,866 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:19,880 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:21,894 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:23,909 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:26,275 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:29,273 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:32,270 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:34,282 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:37,271 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:40,264 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:42,274 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:44,284 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:47,269 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:49,284 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:51,308 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:54,267 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:57,268 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:18:59,276 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:01,284 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:03,300 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:05,314 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:07,326 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:09,341 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:11,355 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:13,368 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:15,382 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:17,390 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:20,266 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:22,277 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:25,270 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:28,261 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:30,274 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:33,276 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:35,400 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:37,410 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:39,424 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:42,276 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:45,265 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:47,278 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:50,276 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:52,286 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:54,299 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:57,267 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:19:59,277 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:02,268 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:04,279 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:07,269 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:10,270 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:13,272 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:16,266 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:18,274 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:21,278 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:23,288 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:26,277 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:29,273 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:32,263 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:35,275 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:38,264 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:41,262 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:43,271 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:46,276 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:48,749 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:51,277 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:54,275 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:57,268 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:20:59,278 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:21:02,265 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:21:04,286 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:21:07,267 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:21:09,276 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:21:12,273 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:21:15,264 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:21:17,276 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:21:20,263 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:21:23,276 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:21:26,277 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:21:29,274 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:21:32,266 basehttp 17828 13468 "GET /api/spa/websites/task-status/3427c711-8be0-4413-b32d-4478efa109e5/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:37:51,332 autoreload 2384 2488 Watching for file changes with StatReloader
+INFO 2025-06-07 01:38:16,125 basehttp 2384 17592 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 01:38:16,131 basehttp 2384 17592 "GET /api/users/me/ HTTP/1.1" 200 256
+INFO 2025-06-07 01:38:59,585 basehttp 2384 17592 "POST /api/spa/websites/analyze_prompt/ HTTP/1.1" 201 15814
+INFO 2025-06-07 01:39:01,670 basehttp 2384 13652 "OPTIONS /api/spa/websites/approve-plan/98/ HTTP/1.1" 200 0
+INFO 2025-06-07 01:39:01,753 basehttp 2384 17592 "POST /api/spa/websites/approve-plan/98/ HTTP/1.1" 202 188
+INFO 2025-06-07 01:39:01,758 basehttp 2384 13652 "OPTIONS /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 0
+INFO 2025-06-07 01:39:01,781 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:01,783 fastmcp_photo_service 12608 18308    Business Type: professional
+INFO 2025-06-07 01:39:01,784 fastmcp_photo_service 12608 18308    Total Images: 10
+INFO 2025-06-07 01:39:01,784 fastmcp_photo_service 12608 18308    Sections: ['hero', 'about', 'portfolio', 'services']
+INFO 2025-06-07 01:39:04,276 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:07,263 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:10,272 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:13,268 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:16,266 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:19,266 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:22,265 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:24,277 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:27,276 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:30,265 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:33,277 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:36,274 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:39,266 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:41,274 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:44,273 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:47,277 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:50,277 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:53,263 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:55,272 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:39:58,264 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:00,274 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:03,277 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:06,269 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:09,273 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:12,272 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:15,274 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:18,276 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:21,269 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:23,278 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:26,265 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:28,274 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:31,263 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:33,272 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:36,265 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:38,276 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:41,266 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:43,276 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:46,273 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:49,276 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:52,270 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:55,263 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:40:58,274 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:00,529 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:03,263 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:05,277 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:08,278 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:10,290 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:13,272 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:16,275 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:18,284 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:21,265 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:23,277 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:26,273 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:29,277 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:31,698 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:34,272 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:37,266 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:40,269 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:42,278 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:45,272 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:48,160 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:50,264 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:53,275 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:56,270 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:41:59,268 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:42:02,264 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:42:04,271 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:42:06,286 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:42:08,300 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:42:10,829 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:42:12,841 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:42:15,276 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:42:17,295 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 80
+INFO 2025-06-07 01:42:19,704 basehttp 2384 17592 "GET /api/spa/websites/task-status/f248cc04-b844-4177-91f7-633a4345e401/ HTTP/1.1" 200 3121
+INFO 2025-06-07 01:42:21,223 basehttp 2384 13652 "OPTIONS /api/spa/websites/95/ HTTP/1.1" 200 0
+INFO 2025-06-07 01:42:21,227 basehttp 2384 13652 "OPTIONS /api/spa/websites/95/ HTTP/1.1" 200 0
+INFO 2025-06-07 01:42:21,236 basehttp 2384 17592 "GET /api/spa/websites/95/ HTTP/1.1" 200 170567
+INFO 2025-06-07 01:42:21,245 basehttp 2384 17592 "GET /api/spa/websites/95/ HTTP/1.1" 200 170567
+INFO 2025-06-07 01:43:19,335 autoreload 2384 2488 C:\Users\KAAN\Desktop\core\spa\services\fastmcp_photo_service.py changed, reloading.
+INFO 2025-06-07 01:43:21,117 autoreload 21816 3132 Watching for file changes with StatReloader
+INFO 2025-06-07 01:43:28,426 autoreload 21816 3132 C:\Users\KAAN\Desktop\core\spa\tasks.py changed, reloading.
+INFO 2025-06-07 01:43:29,971 autoreload 2452 9236 Watching for file changes with StatReloader

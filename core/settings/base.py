@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'spa.apps.SpaConfig',
     'deployment.apps.DeploymentConfig',
     'celery',
+    'django_redis',
 
 ]
 
@@ -179,45 +180,6 @@ CORS_ALLOW_CREDENTIALS = True
 # Frontend URL for email verification and password reset links
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 
-# settings/base.py dosyanıza ekleyin
-
-# Logging Configuration
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'formatters': {
-#         'verbose': {
-#             'format': '{levelname} {asctime} {module} {message}',
-#             'style': '{',
-#         },
-#         'simple': {
-#             'format': '{levelname} {message}',
-#             'style': '{',
-#         },
-#     },
-#     'handlers': {
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#             'formatter': 'verbose',
-#         },
-#         'file': {
-#             'class': 'logging.FileHandler',
-#             'filename': os.path.join(BASE_DIR, 'debug.log'),
-#             'formatter': 'verbose',
-#         },
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['console', 'file'],
-#             'level': 'INFO',
-#         },
-#         'users': {
-#             'handlers': ['console', 'file'],
-#             'level': 'DEBUG',
-#             'propagate': False,
-#         },
-#     },
-# }
 
 
 MCP_SCRIPT_PATH = os.path.join(BASE_DIR, 'spa', 'services', 'mcp_photo_service.py')
@@ -253,18 +215,7 @@ MCP_CIRCUIT_BREAKER_RECOVERY_TIMEOUT = 300
 # Health Check Configuration
 MCP_HEALTH_CHECK_INTERVAL = 300
 
-# Cache Configuration (Redis önerilir)
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-        'KEY_PREFIX': 'spa_images',
-        'TIMEOUT': 3600,
-    }
-}
+
 
 os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
 UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY', 'your_unsplash_access_key_here')
