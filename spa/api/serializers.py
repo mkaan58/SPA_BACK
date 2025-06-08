@@ -11,7 +11,8 @@ class WebsiteSerializer(serializers.ModelSerializer):
             'id', 'title', 'prompt', 'html_content','contact_email',
             'primary_color', 'secondary_color', 'accent_color', 'background_color',
             'theme', 'heading_font', 'body_font', 'corner_radius',
-             'created_at', 'updated_at', 'custom_styles', 'element_contents'
+            'created_at', 'updated_at', 'custom_styles', 'element_contents',
+            'original_user_prompt', 'business_context'  # YENİ ALANLAR EKLE
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
     
@@ -33,19 +34,24 @@ class WebsiteCreateSerializer(serializers.ModelSerializer):
         fields = [
             'prompt','contact_email',
             'primary_color', 'secondary_color', 'accent_color', 'background_color',
-            'theme', 'heading_font', 'body_font', 'corner_radius'
+            'theme', 'heading_font', 'body_font', 'corner_radius',
+            'original_user_prompt', 'business_context'  # YENİ ALANLAR EKLE
         ]
-
 
     def create(self, validated_data):
         prompt_text = validated_data['prompt']
         
-        # ✅ Enhanced prompt kontrolü
+        # YENİ: Original prompt'u kaydet
+        original_prompt = validated_data.get('original_user_prompt', '')
+        
+        # Eğer original_user_prompt boşsa ve normal prompt enhanced değilse, onu original olarak kaydet
+        if not original_prompt and not prompt_text.startswith(('APPROVED DESIGN PLAN:', '**APPROVED DESIGN PLAN:')):
+            original_prompt = prompt_text
+        
+        # ✅ Enhanced prompt kontrolü (mevcut kod - değişiklik yok)
         if prompt_text.startswith(('APPROVED DESIGN PLAN:', '**APPROVED DESIGN PLAN:')):
-            # Enhanced prompt'tan original'i çıkarmaya çalış
             title = self._extract_title_from_enhanced_prompt(prompt_text)
         else:
-            # Normal prompt
             words = prompt_text.split()
             title = ' '.join(words[:5]) + '...' if len(words) > 5 else prompt_text
 
@@ -54,6 +60,8 @@ class WebsiteCreateSerializer(serializers.ModelSerializer):
             title=title,
             prompt=prompt_text,
             html_content='',
+            original_user_prompt=original_prompt,  # YENİ ALAN
+            business_context=validated_data.get('business_context', {}),  # YENİ ALAN
             contact_email=validated_data.get('contact_email', ''),
             primary_color=validated_data.get('primary_color', ''),
             secondary_color=validated_data.get('secondary_color', ''),
@@ -64,7 +72,6 @@ class WebsiteCreateSerializer(serializers.ModelSerializer):
             body_font=validated_data.get('body_font', ''),
             corner_radius=validated_data.get('corner_radius', 8)
         )
-
     def _extract_title_from_enhanced_prompt(self, enhanced_prompt):
         """Enhanced prompt'tan anlamlı title çıkar"""
         try:

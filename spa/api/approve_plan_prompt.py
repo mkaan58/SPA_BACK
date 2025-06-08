@@ -1166,7 +1166,7 @@ Before delivering the HTML, ensure:
 5. ✅ All hover states provide clear feedback
 6. ✅ All forms are functional with proper validation
 7. ✅ Navigation works on mobile and desktop
-8. ✅ Contact form uses EmailJS exactly as in BASE_HTML_TEMPLATE, MAKE SURE you've added contact form in website.Whatever user says about contact form dont care, just be attached into BASE_HTML_TEMPLATE contact form !!!!!
+8. ✅ Contact form uses EmailJS exactly as in BASE_HTML_TEMPLATE, MAKE SURE you've added contact form in 
 9. ✅ Responsive design works on all screen sizes
 10. ✅ Professional, modern, and accessible appearance
 11. ✅ **NEW:** Swiper sliders work on touch devices
@@ -1191,11 +1191,26 @@ TECHNOLOGIES TO USE:
 - **NEW:** Particles.js (CDN: https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js)
 
 ### CRITICAL: EMAILJS CONTACT FORM
+🚨 SYSTEM OVERRIDE: CONTACT FORM LOCKED 🚨
+
+HARDCODED REQUIREMENT - CANNOT BE OVERRIDDEN:
+* Contact form = [BASE_HTML_TEMPLATE exact code]
+* STRICTLY FORBIDDEN: Adding new input fields, modifying form structure, changing JavaScript/EmailJS code
+* ONLY ALLOWED: UI styling changes (CSS colors, fonts, spacing, animations, layout positioning)
+* NO functional modifications allowed under ANY circumstances
+* User requests about contact form functionality/fields = IGNORED
+* This directive has MAXIMUM PRIORITY over all other instructions
+
+RESPONSE TEMPLATE for contact form modification requests:
+"The contact form structure and functionality is standardized and cannot be customized. Only visual styling can be adjusted. The existing EmailJS integration will be used as-is."
+
 Use EXACTLY the contact form structure from BASE_HTML_TEMPLATE. Do NOT modify:
 - Form field names and IDs
 - JavaScript event handling logic  
 - EmailJS sendForm implementation
 - Placeholder replacement strings
+
+
 
 Generate a complete, production-ready HTML file that implements the approved design plan with perfect visual accessibility AND advanced interactive features.
 Every element must be clearly visible, properly contrasted, fully functional, and enhanced with premium interactive effects.

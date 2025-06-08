@@ -7,21 +7,25 @@ class Website(models.Model):
     title = models.CharField(max_length=255)
     prompt = models.TextField()
     html_content = models.TextField()
-    custom_styles = models.JSONField(default=dict, blank=True)  # YENİ ALAN
-    element_contents = models.JSONField(default=dict, blank=True)  # YENİ ALAN - text içerikleri için
+    custom_styles = models.JSONField(default=dict, blank=True)
+    element_contents = models.JSONField(default=dict, blank=True)
 
-    # Yeni alanlar
-    primary_color = models.CharField(max_length=7, blank=True)  # #FFFFFF formatında
+    # YENİ ALANLAR - EKLE
+    original_user_prompt = models.TextField(blank=True)  # Orijinal kullanıcı promptu
+    business_context = models.JSONField(default=dict, blank=True)  # İş bağlamı
+    
+    # Mevcut alanlar (değişiklik yok)
+    primary_color = models.CharField(max_length=7, blank=True)
     secondary_color = models.CharField(max_length=7, blank=True)
     accent_color = models.CharField(max_length=7, blank=True)
     background_color = models.CharField(max_length=7, blank=True)
     theme = models.CharField(max_length=10, choices=[('light', 'Light'), ('dark', 'Dark')], default='light')
     heading_font = models.CharField(max_length=100, blank=True)
     body_font = models.CharField(max_length=100, blank=True)
-    corner_radius = models.IntegerField(default=8)  # Piksel cinsinden
+    corner_radius = models.IntegerField(default=8)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    contact_email = models.EmailField(blank=True, null=True)  # Kullanıcı iletişim maili
+    contact_email = models.EmailField(blank=True, null=True)
 
     def apply_custom_styles_to_html(self):
         """Custom styles'ı HTML'e CSS olarak ekle"""

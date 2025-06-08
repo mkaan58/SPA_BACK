@@ -182,11 +182,7 @@ FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 
 
 
-MCP_SCRIPT_PATH = os.path.join(BASE_DIR, 'spa', 'services', 'mcp_photo_service.py')
-# MCP Configuration
-# USE_MCP_PHOTO_SERVICE = False  # Önce False ile test edin
-USE_FASTMCP_PHOTO_SERVICE = True
-MCP_DEBUG_MODE = True
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -203,17 +199,7 @@ LOGGING = {
         },
     },
 }
-MCP_PHOTO_SERVICE_URL = "http://localhost:8080"  # Django serverınızla aynı port
-MCP_PHOTO_SERVICE_TIMEOUT = 30
-MCP_PHOTO_SERVICE_MAX_RETRIES = 3
-MCP_PHOTO_SERVICE_CACHE_TIMEOUT = 3600
 
-# Circuit Breaker Configuration
-MCP_CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5
-MCP_CIRCUIT_BREAKER_RECOVERY_TIMEOUT = 300
-
-# Health Check Configuration
-MCP_HEALTH_CHECK_INTERVAL = 300
 
 
 
