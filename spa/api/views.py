@@ -46,10 +46,240 @@ from spa.services.streamlined_photo_service import streamlined_photo_service
 from asgiref.sync import sync_to_async
 from typing import Dict, List
 
+import json
+import html
 
 logger = logging.getLogger(__name__)
 
 # Base HTML Template - Modern Website with all features
+
+# spa/api/views.py - Line-Based AI Editor
+
+import logging
+import json
+import re
+import time
+
+# Configure logger for better debugging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Create handler if it doesn't exist
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+class LineBasedAIEditor:
+    """Line-based AI editing system for precise website modifications"""
+    
+    def __init__(self):
+        self.html_lines = []
+        self.line_map = {}
+        
+
+    def prepare_line_context(self, html_content, user_request):
+        """Prepare smart line-numbered HTML context for AI"""
+        
+        # Split HTML into lines
+        self.html_lines = html_content.split('\n')
+        
+        # Create line mapping with numbers
+        numbered_html = ""
+        for i, line in enumerate(self.html_lines, 1):
+            numbered_html += f"{i:4d}: {line}\n"
+        
+        # Quick structure analysis
+        structure_info = self._analyze_html_structure()
+        
+        ai_prompt = f"""
+    You are an expert HTML/CSS editor with structural awareness. You understand component relationships and never break functional structures.
+
+    USER REQUEST: "{user_request}"
+
+    STRUCTURAL OVERVIEW:
+    {structure_info}
+
+    HTML WITH LINE NUMBERS:
+    {numbered_html}
+
+    CRITICAL INTELLIGENCE RULES:
+    1. DETECT COMPONENTS: Identify sliders, modals, forms, sections before making changes
+    2. PRESERVE STRUCTURES: Never break container-wrapper-item hierarchies
+    3. SAFE DELETION: When removing items, only remove the item itself, not its container
+    4. PATTERN RECOGNITION: Understand common patterns (Swiper sliders, Bootstrap modals, etc.)
+    5. VALIDATE CHANGES: Ensure your changes don't break functionality
+
+    COMPONENT AWARENESS:
+    - Swiper Sliders: Container > Wrapper > Slides + Navigation + Pagination
+    - Modals: Trigger > Modal Container > Content
+    - Forms: Form Tag > Field Groups > Individual Fields
+    - Sections: Section Tag > Content Blocks
+
+    SMART EXAMPLES:
+
+    Request: "Remove last project from portfolio"
+    → THINK: This is likely a slider/carousel. Find the last slide item only, preserve navigation.
+    → ACTION: Remove last <div class="swiper-slide">...</div> completely, keep wrapper intact.
+
+    Request: "Delete contact form"  
+    → THINK: User wants form gone, but preserve section structure.
+    → ACTION: Remove form content, keep section container.
+
+    Request: "Fix modal not showing"
+    → THINK: Modal JavaScript issue, check triggers and IDs.
+    → ACTION: Fix modal attributes, ensure proper linking.
+
+    STRUCTURAL SAFETY CHECK:
+    Before responding, mentally verify:
+    - Will containers remain intact?
+    - Will navigation/pagination still work?
+    - Are there any orphaned closing tags?
+    - Does the change make structural sense?
+
+    REQUIRED JSON FORMAT:
+    {{
+      "analysis": "What you understood and what component you're modifying",
+      "structural_impact": "What structures this change affects",
+      "line_changes": [
+        {{
+          "start_line": 123,
+          "end_line": 125, 
+          "reason": "Specific reason for this exact change",
+          "new_content": "Precise replacement content or empty string for deletion"
+        }}
+      ],
+      "summary": "Brief summary of changes and structural preservation"
+    }}
+
+    RESPOND WITH VALID JSON ONLY. NO MARKDOWN. NO EXPLANATIONS OUTSIDE JSON.
+    """
+        
+        return ai_prompt
+
+    def _analyze_html_structure(self):
+        """Analyze HTML structure for AI context"""
+        structure = {
+            'sections': [],
+            'forms': [],
+            'scripts': [],
+            'total_lines': len(self.html_lines)
+        }
+        
+        current_section = None
+        in_script = False
+        in_form = False
+        
+        for i, line in enumerate(self.html_lines, 1):
+            line_clean = line.strip()
+            
+            # Detect sections
+            if re.search(r'<(section|div)[^>]*id=["\']([^"\']*)["\']', line_clean):
+                match = re.search(r'id=["\']([^"\']*)["\']', line_clean)
+                if match:
+                    section_id = match.group(1)
+                    structure['sections'].append({
+                        'id': section_id,
+                        'start_line': i,
+                        'type': 'section'
+                    })
+            
+            # Detect forms
+            if '<form' in line_clean:
+                match = re.search(r'id=["\']([^"\']*)["\']', line_clean)
+                form_id = match.group(1) if match else f'form_line_{i}'
+                structure['forms'].append({
+                    'id': form_id,
+                    'start_line': i,
+                    'type': 'form'
+                })
+                in_form = True
+            elif '</form>' in line_clean and in_form:
+                if structure['forms']:
+                    structure['forms'][-1]['end_line'] = i
+                in_form = False
+            
+            # Detect scripts
+            if '<script' in line_clean:
+                structure['scripts'].append({
+                    'start_line': i,
+                    'type': 'script'
+                })
+                in_script = True
+            elif '</script>' in line_clean and in_script:
+                if structure['scripts']:
+                    structure['scripts'][-1]['end_line'] = i
+                in_script = False
+        
+        # Format structure info for AI
+        info = f"Total Lines: {structure['total_lines']}\n"
+        info += f"Sections Found: {len(structure['sections'])}\n"
+        
+        for section in structure['sections']:
+            info += f"  - {section['id']}: starts at line {section['start_line']}\n"
+        
+        info += f"Forms Found: {len(structure['forms'])}\n"
+        for form in structure['forms']:
+            end_info = f" to {form.get('end_line', '?')}" if 'end_line' in form else ""
+            info += f"  - {form['id']}: lines {form['start_line']}{end_info}\n"
+        
+        info += f"Script Blocks: {len(structure['scripts'])}\n"
+        for script in structure['scripts']:
+            end_info = f" to {script.get('end_line', '?')}" if 'end_line' in script else ""
+            info += f"  - Script: lines {script['start_line']}{end_info}\n"
+        
+        return info
+    
+    def apply_line_changes(self, line_changes):
+        """Apply line-based changes to HTML content"""
+        
+        if not line_changes:
+            return '\n'.join(self.html_lines)
+        
+        # Sort changes by start_line in reverse order (from bottom to top)
+        # This prevents line number shifts from affecting subsequent changes
+        sorted_changes = sorted(line_changes, key=lambda x: x['start_line'], reverse=True)
+        
+        modified_lines = self.html_lines.copy()
+        
+        for change in sorted_changes:
+            start_line = change['start_line'] - 1  # Convert to 0-based index
+            end_line = change['end_line'] - 1      # Convert to 0-based index
+            new_content = change['new_content']
+            
+            # Validate line numbers
+            if start_line < 0 or end_line >= len(modified_lines):
+                logger.error(f"Invalid line range: {start_line+1} to {end_line+1}")
+                continue
+            
+            if start_line > end_line:
+                logger.error(f"Invalid line range: start ({start_line+1}) > end ({end_line+1})")
+                continue
+            
+            # ✅ DÜZELTME: Boş content kontrolü
+            if new_content is None or new_content == "":
+                # Gerçek silme işlemi - hiç satır ekleme
+                new_lines = []
+            else:
+                # ✅ DÜZELTME: strip() ile boş satırları temizle
+                new_lines = [line for line in new_content.split('\n')]
+                # Sadece tamamen boş content'te boş array döndür
+                if len(new_lines) == 1 and new_lines[0].strip() == "":
+                    new_lines = []
+            
+            # Replace the specified line range with new content
+            # Remove old lines and insert new ones
+            del modified_lines[start_line:end_line+1]
+            
+            # Insert new lines
+            for i, new_line in enumerate(new_lines):
+                modified_lines.insert(start_line + i, new_line)
+            
+            logger.info(f"✅ Applied change: lines {start_line+1}-{end_line+1} → {len(new_lines)} new lines")
+        
+        return '\n'.join(modified_lines)
+
 
 
 class WebsiteViewSet(viewsets.ModelViewSet):
@@ -89,6 +319,8 @@ class WebsiteViewSet(viewsets.ModelViewSet):
                     valid_urls += 1
         
         return valid_urls >= 3
+
+
 
 
     @action(detail=False, methods=['post'])
@@ -745,3 +977,445 @@ UPDATED PLAN:
         website = self.get_object()
         html_content = website.apply_all_customizations_safe()  # Safe version
         return Response({'html_content': html_content})
+    
+
+    # Add this to check API key
+    def _check_gemini_setup(self):
+        """Check if Gemini API is properly configured"""
+        if not hasattr(settings, 'GEMINI_API_KEY') or not settings.GEMINI_API_KEY:
+            logger.error("❌ GEMINI_API_KEY not configured in settings")
+            return False
+        
+        if settings.GEMINI_API_KEY == 'your-gemini-api-key-here':
+            logger.error("❌ GEMINI_API_KEY is placeholder value")
+            return False
+        
+        return True
+
+
+        # Add to WebsiteViewSet
+
+    @action(detail=True, methods=['post'])
+    def ai_line_edit(self, request, pk=None):
+        """Line-based AI editing endpoint with save verification"""
+        start_time = time.time()
+        website = self.get_object()
+        
+        try:
+            user_request = request.data.get('user_request', '').strip()
+            if not user_request:
+                return Response({
+                    'error': 'User request is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            logger.info(f"🤖 Line-based AI Edit: {user_request[:100]}...")
+            
+            # Store original HTML for comparison
+            original_html = website.html_content
+            original_length = len(original_html)
+            
+            # Initialize line-based editor
+            editor = LineBasedAIEditor()
+            
+            # Prepare context
+            ai_prompt = editor.prepare_line_context(website.html_content, user_request)
+            
+            # Send to AI with enhanced error handling
+            try:
+                client = genai.Client(api_key=settings.GEMINI_API_KEY)
+                
+                enhanced_ai_prompt = ai_prompt + """
+
+    CRITICAL: Your response must be VALID JSON starting with { and ending with }.
+    Do not include any text before or after the JSON.
+    Do not use markdown code blocks.
+    Do not include explanations outside the JSON.
+
+    Example valid response:
+    {"analysis": "Adding phone field to contact form", "line_changes": [{"start_line": 45, "end_line": 55, "reason": "Replace form HTML", "new_content": "<form>...</form>"}], "summary": "Added phone field successfully"}
+    """
+                
+                contents = [
+                    types.Content(
+                        role="user",
+                        parts=[types.Part.from_text(text=enhanced_ai_prompt)],
+                    ),
+                ]
+
+                generate_content_config = types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.1,
+                    max_output_tokens=6000,
+                    candidate_count=1,
+                    top_k=1,
+                    top_p=0.8,
+                )
+
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash-preview-05-20",
+                    contents=contents,
+                    config=generate_content_config,
+                )
+                
+                if not response or not response.text:
+                    logger.error("❌ AI service returned empty response")
+                    return Response({
+                        'error': 'AI service returned empty response'
+                    }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+                
+                raw_response = response.text.strip()
+                logger.info(f"🔍 Raw AI Response (first 300 chars): {raw_response[:300]}")
+                
+            except Exception as ai_error:
+                logger.error(f"❌ AI Error: {ai_error}")
+                return Response({
+                    'error': f'AI service error: {str(ai_error)}'
+                }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            
+            # Enhanced AI response parsing
+            try:
+                ai_response = json.loads(raw_response)
+                logger.info("✅ Direct JSON parsing successful")
+                
+            except json.JSONDecodeError as parse_error:
+                logger.error(f"❌ JSON parse error: {parse_error}")
+                return Response({
+                    'error': 'AI returned invalid JSON format',
+                    'raw_response': raw_response[:500],
+                    'parse_error': str(parse_error)
+                }, status=status.HTTP_502_BAD_GATEWAY)
+            
+            # Validate AI response structure
+            if not isinstance(ai_response, dict):
+                return Response({
+                    'error': 'AI response is not a valid object',
+                    'response_type': str(type(ai_response))
+                }, status=status.HTTP_502_BAD_GATEWAY)
+            
+            if 'line_changes' not in ai_response:
+                logger.warning("⚠️ AI response missing line_changes, adding empty array")
+                ai_response['line_changes'] = []
+            
+            # Apply line changes
+            try:
+                if ai_response['line_changes']:
+                    modified_html = editor.apply_line_changes(ai_response['line_changes'])
+                    
+                    # ✅ AKILLI YAPISAL KONTROL
+                    validation_result = self.validate_html_structure(original_html, modified_html, user_request)
+                    
+                    if not validation_result['valid']:
+                        logger.error(f"❌ Structure validation failed: {validation_result['errors']}")
+                        return Response({
+                            'error': 'AI broke critical HTML structure',
+                            'validation_errors': validation_result['errors'],
+                            'warnings': validation_result['warnings'],
+                            'suggestion': 'AI made unsafe changes. Try a more specific command.',
+                            'user_request': user_request,
+                            'recovery_tip': 'Use manual edit mode or refresh the page to restore.'
+                        }, status=status.HTTP_400_BAD_REQUEST)
+                    
+                    # Warnings varsa log'la ama devam et
+                    if validation_result['warnings']:
+                        logger.warning(f"⚠️ Structure warnings: {validation_result['warnings']}")
+                    
+                    # Comprehensive HTML validation
+                    if not modified_html or not modified_html.strip():
+                        raise ValueError("Modified HTML is empty")
+                    
+                    if '<html' not in modified_html.lower():
+                        raise ValueError("Modified HTML missing <html> tag")
+                    
+                    if '</html>' not in modified_html.lower():
+                        raise ValueError("Modified HTML missing closing </html> tag")
+                    
+                    # **CRITICAL: SAVE TO DATABASE**
+                    logger.info("💾 Saving modified HTML to database...")
+                    website.html_content = modified_html
+                    website.save(update_fields=['html_content'])
+                    
+                    # **VERIFY SAVE OPERATION**
+                    website.refresh_from_db()
+                    saved_html = website.html_content
+                    saved_length = len(saved_html)
+                    
+                    if saved_html != modified_html:
+                        logger.error("❌ Database save verification failed - content mismatch!")
+                        return Response({
+                            'error': 'Failed to save changes to database - content mismatch',
+                            'expected_length': len(modified_html),
+                            'saved_length': saved_length
+                        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    
+                    logger.info(f"✅ Database save verified: {original_length} -> {saved_length} chars")
+                    
+                    # Check if changes were actually applied
+                    if saved_html == original_html:
+                        logger.warning("⚠️ No actual changes detected in saved HTML")
+                        return Response({
+                            'warning': 'No actual changes were applied',
+                            'analysis': ai_response.get('analysis', ''),
+                            'line_changes_attempted': len(ai_response.get('line_changes', [])),
+                            'original_html': original_html,
+                            'reason': 'AI may have determined no changes were needed'
+                        }, status=status.HTTP_200_OK)
+                    
+                else:
+                    # No changes to apply
+                    modified_html = website.html_content
+                    logger.info("ℹ️ No line changes to apply, returning original HTML")
+                
+            except Exception as apply_error:
+                logger.error(f"❌ Apply changes error: {apply_error}")
+                return Response({
+                    'error': f'Failed to apply changes: {str(apply_error)}',
+                    'line_changes': ai_response.get('line_changes', []),
+                    'original_html_length': len(website.html_content)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            elapsed_time = time.time() - start_time
+            
+            # Success response with comprehensive data
+            return Response({
+                'success': True,
+                'modified_html': modified_html,
+                'analysis': ai_response.get('analysis', 'No analysis provided'),
+                'changes_applied': len(ai_response.get('line_changes', [])),
+                'summary': ai_response.get('summary', 'No summary provided'),
+                'processing_time': round(elapsed_time, 2),
+                'line_changes': ai_response.get('line_changes', []),
+                'original_html_length': original_length,
+                'modified_html_length': len(modified_html),
+                'html_actually_changed': modified_html != original_html,
+                'database_save_verified': True,
+                'validation_warnings': validation_result.get('warnings', []) if 'validation_result' in locals() else [],
+                'changes_summary': {
+                    'lines_affected': len(ai_response.get('line_changes', [])),
+                    'total_lines_before': len(original_html.split('\n')),
+                    'total_lines_after': len(modified_html.split('\n')),
+                    'size_change': len(modified_html) - original_length
+                }
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            elapsed_time = time.time() - start_time
+            logger.error(f"❌ Line-based AI Edit failed: {str(e)}")
+            
+            return Response({
+                'error': f'Line-based AI edit failed: {str(e)}',
+                'processing_time': round(elapsed_time, 2),
+                'error_type': type(e).__name__,
+                'user_request': user_request[:100] if 'user_request' in locals() else 'Unknown'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# views.py'ye bu kapsamlı versiyonu koy:
+
+    def validate_html_structure(self, original_html, modified_html, user_request=""):
+        """Kapsamlı ve hızlı HTML yapı doğrulaması"""
+        
+        # Early exit - hiç değişiklik yoksa
+        if original_html == modified_html:
+            return {'valid': True, 'errors': [], 'warnings': []}
+        
+        errors = []
+        warnings = []
+        
+        # KAPSAMLI kritik patterns
+        critical_patterns = {
+            # Slider/Carousel structures
+            'swiper-wrapper': 'Slider wrapper',
+            'swiper-container': 'Slider container',
+            'swiper-pagination': 'Slider pagination',
+            'swiper-button': 'Slider navigation',
+            'carousel-inner': 'Bootstrap carousel',
+            'carousel-item': 'Bootstrap carousel item',
+            
+            # Form structures
+            '<form': 'Form start',
+            '</form>': 'Form end',
+            
+            # Modal structures  
+            'modal-dialog': 'Modal dialog',
+            'modal-content': 'Modal content',
+            'data-bs-toggle="modal"': 'Modal trigger',
+            'data-toggle="modal"': 'Modal trigger (old)',
+            
+            # Navigation structures
+            'navbar': 'Navigation bar',
+            'nav-item': 'Navigation item',
+            
+            # Grid/Layout structures
+            'container': 'Container layout',
+            'row': 'Grid row',
+            'col-': 'Grid column',
+            
+            # JavaScript libraries
+            '<script': 'Script tag',
+            '</script>': 'Script close',
+            
+            # CSS structures
+            '<style': 'Style tag',
+            '</style>': 'Style close'
+        }
+        
+        # Hızlı kontrol
+        for pattern, description in critical_patterns.items():
+            orig_count = original_html.count(pattern)
+            mod_count = modified_html.count(pattern)
+            
+            # Kritik yapı azaldıysa
+            if mod_count < orig_count:
+                # Silme komutu kontrol et
+                is_delete_command = any(word in user_request.lower() for word in 
+                                      ['sil', 'kaldır', 'delete', 'remove', 'çıkar'])
+                
+                # Content silme vs yapı silme ayrımı
+                if pattern in ['<form', '</form>', 'swiper-wrapper', 'modal-dialog']:
+                    # Bu patterns hiçbir zaman silinmemeli
+                    errors.append(f"CRITICAL: {description} structure broken! ({orig_count} → {mod_count})")
+                elif is_delete_command:
+                    # Normal silme işlemi
+                    warnings.append(f"INFO: {description} removed as requested ({orig_count} → {mod_count})")
+                else:
+                    # İstenmeden silme
+                    errors.append(f"WARNING: {description} accidentally removed! ({orig_count} → {mod_count})")
+        
+        # ÖZEL YAPISAL KONTROLLER
+        
+        # 1. Swiper bütünlük kontrolü
+        if 'swiper' in original_html.lower():
+            orig_containers = original_html.count('swiper-container')
+            orig_wrappers = original_html.count('swiper-wrapper')
+            mod_containers = modified_html.count('swiper-container')
+            mod_wrappers = modified_html.count('swiper-wrapper')
+            
+            # Container-wrapper eşitlik kontrolü
+            if orig_containers == orig_wrappers and mod_containers != mod_wrappers:
+                errors.append("CRITICAL: Swiper container/wrapper mismatch!")
+        
+        # 2. Form bütünlük kontrolü
+        if '<form' in original_html:
+            orig_opens = original_html.count('<form')
+            orig_closes = original_html.count('</form>')
+            mod_opens = modified_html.count('<form')
+            mod_closes = modified_html.count('</form>')
+            
+            if mod_opens != mod_closes:
+                errors.append(f"CRITICAL: Form tags unmatched! ({mod_opens} opens, {mod_closes} closes)")
+        
+        # 3. Modal bütünlük kontrolü
+        if 'modal' in original_html:
+            orig_modals = original_html.count('modal-dialog')
+            orig_triggers = original_html.count('data-bs-toggle="modal"') + original_html.count('data-toggle="modal"')
+            mod_modals = modified_html.count('modal-dialog')
+            mod_triggers = modified_html.count('data-bs-toggle="modal"') + modified_html.count('data-toggle="modal"')
+            
+            # Modal var ama trigger yok
+            if mod_modals > 0 and mod_triggers == 0:
+                warnings.append("WARNING: Modal exists but no triggers found!")
+        
+        # 4. Script/Style tag eşleşme kontrolü
+        script_pairs = [
+            ('<script', '</script>'),
+            ('<style', '</style>'),
+            ('<div', '</div>'),  # Genel div kontrolü
+        ]
+        
+        for open_tag, close_tag in script_pairs:
+            mod_opens = modified_html.count(open_tag)
+            mod_closes = modified_html.count(close_tag)
+            
+            if mod_opens != mod_closes and abs(mod_opens - mod_closes) > 1:  # 1 fark toleransı
+                errors.append(f"CRITICAL: Unmatched {open_tag}/{close_tag} tags! ({mod_opens}/{mod_closes})")
+        
+        # 5. Bootstrap component kontrolü
+        if 'bootstrap' in original_html.lower() or 'bs-' in original_html:
+            bootstrap_components = ['carousel', 'modal', 'dropdown', 'collapse', 'navbar']
+            for component in bootstrap_components:
+                if component in original_html and component not in modified_html:
+                    warnings.append(f"INFO: Bootstrap {component} component removed")
+        
+        # 6. CSS Framework kontrolü (Tailwind, Bulma, etc.)
+        css_frameworks = {
+            'flex': 'Flexbox classes',
+            'grid': 'Grid classes', 
+            'btn': 'Button classes',
+            'card': 'Card components'
+        }
+        
+        for framework, description in css_frameworks.items():
+            if framework in original_html and original_html.count(framework) > modified_html.count(framework) + 5:
+                warnings.append(f"INFO: Many {description} removed")
+        
+        return {
+            'valid': len(errors) == 0,
+            'errors': errors,
+            'warnings': warnings,
+            'critical_count': len(errors),
+            'warning_count': len(warnings),
+            'components_checked': len(critical_patterns),
+            'validation_scope': 'comprehensive'
+        }
+
+
+
+    @action(detail=True, methods=['get'])
+    def debug_html_content(self, request, pk=None):
+        """Debug endpoint to check current HTML content"""
+        website = self.get_object()
+        
+        html_lines = website.html_content.split('\n')
+        
+        # Find title tag
+        title_line = next((line for line in html_lines if '<title>' in line.lower()), 'No title found')
+        
+        # Extract title content if found
+        title_content = 'No title'
+        if '<title>' in title_line.lower():
+            try:
+                import re
+                title_match = re.search(r'<title[^>]*>(.*?)</title>', title_line, re.IGNORECASE)
+                if title_match:
+                    title_content = title_match.group(1).strip()
+            except:
+                title_content = 'Title extraction failed'
+        
+        # Get meta description if exists
+        meta_description = next((line for line in html_lines if 'meta' in line.lower() and 'description' in line.lower()), 'No meta description')
+        
+        # Count common HTML elements
+        element_counts = {
+            'divs': website.html_content.count('<div'),
+            'sections': website.html_content.count('<section'),
+            'headers': website.html_content.count('<header'),
+            'footers': website.html_content.count('<footer'),
+            'images': website.html_content.count('<img'),
+            'links': website.html_content.count('<a '),
+            'buttons': website.html_content.count('<button'),
+            'forms': website.html_content.count('<form'),
+        }
+        
+        return Response({
+            'website_id': website.id,
+            'title': website.title if hasattr(website, 'title') else 'No title field',
+            'html_length': len(website.html_content),
+            'total_lines': len(html_lines),
+            'first_10_lines': html_lines[:10],
+            'last_10_lines': html_lines[-10:],
+            'title_tag': title_line[:100] + '...' if len(title_line) > 100 else title_line,
+            'title_content': title_content,
+            'meta_description': meta_description[:100] + '...' if len(meta_description) > 100 else meta_description,
+            'element_counts': element_counts,
+            'html_preview': {
+                'starts_with': website.html_content[:200],
+                'ends_with': website.html_content[-200:],
+            },
+            'last_modified': getattr(website, 'updated_at', 'Unknown'),
+            'character_encoding_check': {
+                'has_utf8_meta': 'charset=utf-8' in website.html_content.lower() or 'charset="utf-8"' in website.html_content.lower(),
+                'has_viewport': 'viewport' in website.html_content.lower(),
+                'has_doctype': website.html_content.strip().startswith('<!DOCTYPE'),
+            }
+        })
+    

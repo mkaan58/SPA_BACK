@@ -148,3 +148,22 @@ class ElementStyleSerializer(serializers.Serializer):
     property = serializers.CharField(max_length=50)
     value = serializers.CharField(max_length=200)
     element_id = serializers.CharField(max_length=100, required=False)
+
+
+
+class AIStructuralEditSerializer(serializers.Serializer):
+    """Serializer for AI structural edit requests"""
+    ai_prompt = serializers.CharField(max_length=2000, help_text="AI edit instruction")
+    selected_element = serializers.JSONField(required=False, help_text="Currently selected element context")
+    
+    def validate_ai_prompt(self, value):
+        """Validate AI prompt"""
+        if not value.strip():
+            raise serializers.ValidationError("AI prompt cannot be empty")
+        
+        # Check for potentially harmful requests
+        harmful_keywords = ['delete all', 'remove everything', 'format hard drive', 'rm -rf']
+        if any(keyword in value.lower() for keyword in harmful_keywords):
+            raise serializers.ValidationError("Request contains potentially harmful instructions")
+        
+        return value.strip()
