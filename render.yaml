@@ -19,7 +19,6 @@ services:
         value: https://my-frontend-app.onrender.com
       - key: FRONTEND_URL
         value: https://my-frontend-app.onrender.com
-
       - key: REDIS_URL
         fromService:
           name: spa-redis
@@ -66,7 +65,6 @@ services:
         sync: false
       - key: EMAIL_JS_SERVICE_ID
         sync: false
-
   - type: worker
     name: celery-worker
     env: docker
@@ -117,7 +115,6 @@ services:
         sync: false
       - key: FRONTEND_URL
         value: https://my-frontend-app.onrender.com
-
   - type: redis
     name: spa-redis
     region: oregon
