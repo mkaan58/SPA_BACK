@@ -5,6 +5,8 @@ services:
     repo: https://github.com/mkaan58/SPA_BACK
     region: oregon
     plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn core.wsgi:application  
     dockerfilePath: ./Dockerfile.web
     autoDeployTrigger: commit
     envVars:
@@ -22,7 +24,7 @@ services:
         value: https://spa-front-o0yw.onrender.com
       - key: REDIS_URL
         fromService:
-          type: keyvalue
+          type: redis
           name: spa-redis
           property: connectionString
       - key: OPENAI_API_KEY
