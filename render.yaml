@@ -22,14 +22,14 @@ services:
       # PostgreSQL connection string kullanımı
       - key: DATABASE_URL
         fromService:
-          type: postgresql
-          name: my-postgres
+          type: pserv
+          name: SPA
           property: connectionString
       # Redis connection string
       - key: REDIS_URL
         fromService:
           type: redis
-          name: my-redis
+          name: SPA
           property: connectionString
       - key: OPENAI_API_KEY
         sync: false
@@ -77,14 +77,14 @@ services:
       # PostgreSQL connection string kullanımı
       - key: DATABASE_URL
         fromService:
-          type: postgresql
-          name: my-postgres
+          type: pserv
+          name: SPA
           property: connectionString
       # Redis connection string
       - key: REDIS_URL
         fromService:
           type: redis
-          name: my-redis
+          name: SPA
           property: connectionString
       - key: SECRET_KEY
         sync: false
@@ -118,12 +118,12 @@ services:
         value: https://my-frontend-app.onrender.com
 
   - type: redis
-    name: my-redis
+    name: SPA
     region: oregon
     plan: free
     ipAllowList: []
 
-  - type: postgresql
-    name: my-postgres
+  - type: pserv
+    name: SPA
     region: oregon
     plan: starter
