@@ -19,24 +19,11 @@ services:
         value: https://my-frontend-app.onrender.com
       - key: FRONTEND_URL
         value: https://my-frontend-app.onrender.com
-      # PostgreSQL ayrı ayrı değişkenler
-      - key: DB_HOST
+      - key: DATABASE_URL
         fromService:
           type: pserv
-          name: SPA
-          property: host
-      - key: DB_PORT
-        fromService:
-          type: pserv
-          name: SPA
-          property: port
-      - key: DB_NAME
-        value: spa_ozqv
-      - key: DB_USER
-        value: spa_ozqv_user
-      - key: DB_PASSWORD
-        value: ylYFYpqwh9bbFTqOh5FjBVkAX2fB5KXi
-      # Redis connection string
+          name: spa-postgres
+          property: connectionString
       - key: REDIS_URL
         fromService:
           type: redis
@@ -74,6 +61,16 @@ services:
         sync: false
       - key: LEMON_SQUEEZY_CHECKOUT_URL
         sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: EMAIL_JS_PUBLIC_KEY
+        sync: false
+      - key: EMAIL_JS_PRIVATE_KEY
+        sync: false
+      - key: EMAIL_JS_TEMPLATE_ID
+        sync: false
+      - key: EMAIL_JS_SERVICE_ID
+        sync: false
 
   - type: worker
     name: celery-worker
@@ -85,24 +82,11 @@ services:
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: core.settings.prod
-      # PostgreSQL ayrı ayrı değişkenler
-      - key: DB_HOST
+      - key: DATABASE_URL
         fromService:
           type: pserv
-          name: SPA
-          property: host
-      - key: DB_PORT
-        fromService:
-          type: pserv
-          name: SPA
-          property: port
-      - key: DB_NAME
-        value: spa_ozqv
-      - key: DB_USER
-        value: spa_ozqv_user
-      - key: DB_PASSWORD
-        value: ylYFYpqwh9bbFTqOh5FjBVkAX2fB5KXi
-      # Redis connection string
+          name: spa-postgres
+          property: connectionString
       - key: REDIS_URL
         fromService:
           type: redis
@@ -112,13 +96,9 @@ services:
         sync: false
       - key: OPENAI_API_KEY
         sync: false
-      - key: LEMON_SQUEEZY_API_KEY
+      - key: GOOGLE_CLIENT_ID
         sync: false
-      - key: LEMON_SQUEEZY_STORE_ID
-        sync: false
-      - key: LEMON_SQUEEZY_WEBHOOK_SECRET
-        sync: false
-      - key: LEMON_SQUEEZY_CHECKOUT_URL
+      - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: EMAIL_HOST
         value: smtp.gmail.com
@@ -132,9 +112,19 @@ services:
         sync: false
       - key: DEFAULT_FROM_EMAIL
         sync: false
-      - key: GOOGLE_CLIENT_ID
+      - key: GITHUB_ACCESS_TOKEN
         sync: false
-      - key: GOOGLE_CLIENT_SECRET
+      - key: VERCEL_ACCESS_TOKEN
+        sync: false
+      - key: LEMON_SQUEEZY_API_KEY
+        sync: false
+      - key: LEMON_SQUEEZY_STORE_ID
+        sync: false
+      - key: LEMON_SQUEEZY_WEBHOOK_SECRET
+        sync: false
+      - key: LEMON_SQUEEZY_CHECKOUT_URL
+        sync: false
+      - key: GEMINI_API_KEY
         sync: false
       - key: FRONTEND_URL
         value: https://my-frontend-app.onrender.com
@@ -145,6 +135,6 @@ services:
     plan: starter
 
   - type: pserv
-    name: SPA
+    name: spa-postgres
     region: oregon
     plan: starter
