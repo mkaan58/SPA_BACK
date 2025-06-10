@@ -69,7 +69,7 @@ services:
         sync: false
 
   - type: worker
-    name: celery-worker
+    name: SPA_BACK
     runtime: docker
     repo: https://github.com/mkaan58/SPA_BACK
     region: oregon
