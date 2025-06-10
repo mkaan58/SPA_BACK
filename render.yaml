@@ -19,10 +19,7 @@ services:
         value: https://my-frontend-app.onrender.com
       - key: FRONTEND_URL
         value: https://my-frontend-app.onrender.com
-      - key: DATABASE_URL
-        fromService:
-          name: spa-postgres
-          property: connectionString
+
       - key: REDIS_URL
         fromService:
           name: spa-redis
@@ -80,10 +77,6 @@ services:
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: core.settings.prod
-      - key: DATABASE_URL
-        fromService:
-          name: spa-postgres
-          property: connectionString
       - key: REDIS_URL
         fromService:
           name: spa-redis
@@ -133,7 +126,3 @@ services:
       - source: render
         description: other Render services
 
-  - type: pserv
-    name: spa-postgres
-    region: oregon
-    plan: starter
