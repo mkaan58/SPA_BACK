@@ -6,6 +6,8 @@ services:
     region: oregon
     plan: starter
     dockerfilePath: ./Dockerfile.web
+    buildCommand: "echo 'Build completed'"
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT core.wsgi:application"
     autoDeployTrigger: commit
     envVars:
       - key: DJANGO_SETTINGS_MODULE
@@ -120,7 +122,7 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: FRONTEND_URL
-        value: https://my-frontend-app.onrender.com
+        value: https://spa-front-o0yw.onrender.com
 
   - type: keyvalue
     name: spa-redis

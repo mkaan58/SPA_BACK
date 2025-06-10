@@ -32,4 +32,4 @@ ENV DJANGO_SETTINGS_MODULE=core.settings.prod
 ENV PORT=10000
 
 # Gunicorn ile uygulamayı başlat
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:$PORT core.wsgi:application || echo 'Gunicorn failed to start with exit code: $?' && sleep infinity"]
+CMD ["gunicorn", "--bind", "0.0.0.0:10000", "core.wsgi:application", "--workers", "4", "--timeout", "120"]
