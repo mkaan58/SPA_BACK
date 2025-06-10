@@ -1,7 +1,7 @@
 services:
   - type: web
     name: my-backend-app
-    env: docker
+    runtime: docker
     region: oregon
     plan: starter
     dockerfilePath: ./Dockerfile.web
@@ -21,6 +21,7 @@ services:
         value: https://my-frontend-app.onrender.com
       - key: REDIS_URL
         fromService:
+          type: redis
           name: spa-redis
           property: connectionString
       - key: OPENAI_API_KEY
@@ -65,9 +66,10 @@ services:
         sync: false
       - key: EMAIL_JS_SERVICE_ID
         sync: false
+
   - type: worker
     name: celery-worker
-    env: docker
+    runtime: docker
     region: oregon
     plan: starter
     dockerfilePath: ./Dockerfile.worker
@@ -77,6 +79,7 @@ services:
         value: core.settings.prod
       - key: REDIS_URL
         fromService:
+          type: redis
           name: spa-redis
           property: connectionString
       - key: SECRET_KEY
@@ -115,11 +118,11 @@ services:
         sync: false
       - key: FRONTEND_URL
         value: https://my-frontend-app.onrender.com
+
   - type: redis
     name: spa-redis
     region: oregon
     plan: starter
     ipAllowList:
-      - source: render
-        description: other Render services
-
+      - source: 0.0.0.0/0
+        description: everywhere
