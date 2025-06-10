@@ -21,12 +21,10 @@ services:
         value: https://my-frontend-app.onrender.com
       - key: DATABASE_URL
         fromService:
-          type: pserv
           name: spa-postgres
           property: connectionString
       - key: REDIS_URL
         fromService:
-          type: redis
           name: spa-redis
           property: connectionString
       - key: OPENAI_API_KEY
@@ -84,12 +82,10 @@ services:
         value: core.settings.prod
       - key: DATABASE_URL
         fromService:
-          type: pserv
           name: spa-postgres
           property: connectionString
       - key: REDIS_URL
         fromService:
-          type: redis
           name: spa-redis
           property: connectionString
       - key: SECRET_KEY
@@ -133,8 +129,11 @@ services:
     name: spa-redis
     region: oregon
     plan: starter
+    ipAllowList:
+      - source: render
+        description: other Render services
 
-  - type: pserv
+  - type: psql
     name: spa-postgres
     region: oregon
     plan: starter
