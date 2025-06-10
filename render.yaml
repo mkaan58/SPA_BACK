@@ -19,28 +19,16 @@ services:
         value: https://my-frontend-app.onrender.com
       - key: FRONTEND_URL
         value: https://my-frontend-app.onrender.com
-      - key: DB_NAME
+      # PostgreSQL connection string kullanımı
+      - key: DATABASE_URL
         fromService:
+          type: postgresql
           name: my-postgres
-          property: database
-      - key: DB_USER
-        fromService:
-          name: my-postgres
-          property: user
-      - key: DB_PASSWORD
-        fromService:
-          name: my-postgres
-          property: password
-      - key: DB_HOST
-        fromService:
-          name: my-postgres
-          property: host
-      - key: DB_PORT
-        fromService:
-          name: my-postgres
-          property: port
+          property: connectionString
+      # Redis connection string
       - key: REDIS_URL
         fromService:
+          type: redis
           name: my-redis
           property: connectionString
       - key: OPENAI_API_KEY
@@ -86,30 +74,18 @@ services:
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: core.settings.prod
+      # PostgreSQL connection string kullanımı
+      - key: DATABASE_URL
+        fromService:
+          type: postgresql
+          name: my-postgres
+          property: connectionString
+      # Redis connection string
       - key: REDIS_URL
         fromService:
+          type: redis
           name: my-redis
           property: connectionString
-      - key: DB_NAME
-        fromService:
-          name: my-postgres
-          property: database
-      - key: DB_USER
-        fromService:
-          name: my-postgres
-          property: user
-      - key: DB_PASSWORD
-        fromService:
-          name: my-postgres
-          property: password
-      - key: DB_HOST
-        fromService:
-          name: my-postgres
-          property: host
-      - key: DB_PORT
-        fromService:
-          name: my-postgres
-          property: port
       - key: SECRET_KEY
         sync: false
       - key: OPENAI_API_KEY
@@ -145,12 +121,9 @@ services:
     name: my-redis
     region: oregon
     plan: free
-    ipAllowList: [] # Sadece Render özel ağından erişime izin ver
+    ipAllowList: []
 
-  - type: pserv
+  - type: postgresql
     name: my-postgres
     region: oregon
-    plan: free
-    disk:
-      name: postgres-data
-      sizeGB: 1
+    plan: starter
