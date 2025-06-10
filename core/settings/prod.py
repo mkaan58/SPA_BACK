@@ -3,7 +3,7 @@ from .base import *
 import dj_database_url
 import os
 
-DEBUG = False
+DEBUG =True
 
 # ALLOWED_HOSTS - https:// prefix olmadan
 ALLOWED_HOSTS = [
