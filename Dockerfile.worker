@@ -28,4 +28,4 @@ USER myuser
 ENV DJANGO_SETTINGS_MODULE=core.settings.prod
 
 # Celery worker'ı başlat
-CMD ["sh", "-c", "celery -A core.celery worker --loglevel=info --concurrency=4 || echo 'Celery failed to start with exit code: $?' && sleep infinity"]
+CMD ["sh", "-c", "celery -A core.celery.celery worker --loglevel=info --concurrency=4 || echo 'Celery failed to start with exit code: $?' && sleep infinity"]
