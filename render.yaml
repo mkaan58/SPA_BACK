@@ -6,7 +6,7 @@ services:
     region: oregon
     plan: starter
     dockerfilePath: ./Dockerfile.web
-    autoDeploy: true
+    autoDeployTrigger: commit
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: core.settings.prod
@@ -22,7 +22,7 @@ services:
         value: https://my-frontend-app.onrender.com
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: spa-redis
           property: connectionString
       - key: OPENAI_API_KEY
@@ -69,19 +69,20 @@ services:
         sync: false
 
   - type: worker
-    name: spa_worker
+    name: spa-worker
     runtime: docker
     repo: https://github.com/mkaan58/SPA_BACK
     region: oregon
     plan: starter
     dockerfilePath: ./Dockerfile.worker
     preDeployCommand: "python manage.py migrate --settings=core.settings.prod"
+    autoDeployTrigger: commit
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: core.settings.prod
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: spa-redis
           property: connectionString
       - key: SECRET_KEY
@@ -121,7 +122,7 @@ services:
       - key: FRONTEND_URL
         value: https://my-frontend-app.onrender.com
 
-  - type: redis
+  - type: keyvalue
     name: spa-redis
     region: oregon
     plan: starter
