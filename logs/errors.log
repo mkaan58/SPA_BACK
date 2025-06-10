@@ -1,0 +1,20 @@
+ERROR 2025-06-10 16:03:30,611 log 20044 26012 Internal Server Error: /api/spa/websites/109/intelligent_ai_edit/
+ERROR 2025-06-10 16:05:46,682 log 1432 22196 Internal Server Error: /api/spa/websites/109/intelligent_ai_edit/
+Traceback (most recent call last):
+  File "C:\Users\KAAN\anaconda3\envs\SPA\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\KAAN\anaconda3\envs\SPA\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\KAAN\anaconda3\envs\SPA\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\KAAN\anaconda3\envs\SPA\lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\KAAN\anaconda3\envs\SPA\lib\site-packages\rest_framework\views.py", line 517, in dispatch
+    self.response = self.finalize_response(request, response, *args, **kwargs)
+  File "C:\Users\KAAN\anaconda3\envs\SPA\lib\site-packages\rest_framework\views.py", line 429, in finalize_response
+    assert isinstance(response, HttpResponseBase), (
+AssertionError: Expected a `Response`, `HttpResponse` or `StreamingHttpResponse` to be returned from the view, but received a `<class 'NoneType'>`
+ERROR 2025-06-10 16:08:44,683 log 4248 12084 Service Unavailable: /api/spa/websites/109/intelligent_ai_edit/
+ERROR 2025-06-10 16:31:21,791 log 26180 18656 Service Unavailable: /api/spa/websites/107/intelligent_ai_edit/
+ERROR 2025-06-10 16:33:29,604 log 18908 19404 Bad Gateway: /api/spa/websites/107/intelligent_ai_edit/
+ERROR 2025-06-10 16:35:06,059 log 11708 25788 Service Unavailable: /api/spa/websites/107/intelligent_ai_edit/
