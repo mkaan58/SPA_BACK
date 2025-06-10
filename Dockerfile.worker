@@ -4,6 +4,15 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Zaman dilimini ayarla (Europe/Istanbul)
+ENV TZ=Europe/Istanbul
+RUN apt-get update && apt-get install -y tzdata \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone \
+    && apt-get install -y gcc libpq-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Bağımlılıkları yükle
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
@@ -17,8 +26,6 @@ USER myuser
 
 # Ortam değişkenlerini ayarla
 ENV DJANGO_SETTINGS_MODULE=core.settings.prod
-ENV CELERY_BROKER_URL=redis://red-d144t863jp1c73d9col0:6379//
-ENV CELERY_RESULT_BACKEND=redis://red-d144t863jp1c73d9col0:6379//
 
 # Celery worker'ı başlat
-CMD ["sh", "-c", "celery -A core worker --loglevel=info --concurrency=4 || echo 'Celery failed to start with exit code: $?' && sleep infinity"]
+CMD ["sh", "-c", "celery -A core.celery worker --loglevel=info --concurrency=4 || echo 'Celery failed to start with exit code: $?' && sleep infinity"]
