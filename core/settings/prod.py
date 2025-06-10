@@ -33,7 +33,7 @@ CORS_ALLOWED_ORIGINS = [
 if os.environ.get('CORS_ALLOWED_ORIGINS'):
     CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS').split(',')
 
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = False
 CORS_ALLOW_ALL_ORIGINS = False  # Production'da False olmalı
 
 # HTTPS settings
