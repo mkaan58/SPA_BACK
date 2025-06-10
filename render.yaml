@@ -69,13 +69,16 @@ services:
         sync: false
 
   - type: worker
-    name: celery-worker
-    runtime: docker
+    name: SPA_BACK
+    runtime: python
     repo: https://github.com/mkaan58/SPA_BACK
+    branch: main
     region: oregon
     plan: starter
-    dockerfilePath: ./Dockerfile.worker
-    preDeployCommand: "python manage.py migrate --settings=core.settings.prod"
+    buildCommand: ""
+    preDeployCommand: ""
+    startCommand: ""
+    autoDeploy: true
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: core.settings.prod
