@@ -19,12 +19,23 @@ services:
         value: https://my-frontend-app.onrender.com
       - key: FRONTEND_URL
         value: https://my-frontend-app.onrender.com
-      # PostgreSQL connection string kullanımı
-      - key: DATABASE_URL
+      # PostgreSQL ayrı ayrı değişkenler
+      - key: DB_HOST
         fromService:
           type: pserv
-          name: spa-postgres
-          property: connectionString
+          name: SPA
+          property: host
+      - key: DB_PORT
+        fromService:
+          type: pserv
+          name: SPA
+          property: port
+      - key: DB_NAME
+        value: spa_ozqv
+      - key: DB_USER
+        value: spa_ozqv_user
+      - key: DB_PASSWORD
+        value: ylYFYpqwh9bbFTqOh5FjBVkAX2fB5KXi
       # Redis connection string
       - key: REDIS_URL
         fromService:
@@ -74,12 +85,23 @@ services:
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: core.settings.prod
-      # PostgreSQL connection string kullanımı
-      - key: DATABASE_URL
+      # PostgreSQL ayrı ayrı değişkenler
+      - key: DB_HOST
         fromService:
           type: pserv
-          name: spa-postgres
-          property: connectionString
+          name: SPA
+          property: host
+      - key: DB_PORT
+        fromService:
+          type: pserv
+          name: SPA
+          property: port
+      - key: DB_NAME
+        value: spa_ozqv
+      - key: DB_USER
+        value: spa_ozqv_user
+      - key: DB_PASSWORD
+        value: ylYFYpqwh9bbFTqOh5FjBVkAX2fB5KXi
       # Redis connection string
       - key: REDIS_URL
         fromService:
@@ -121,9 +143,8 @@ services:
     name: spa-redis
     region: oregon
     plan: starter
-    ipAllowList: []
 
   - type: pserv
-    name: spa-postgres
+    name: SPA
     region: oregon
     plan: starter
