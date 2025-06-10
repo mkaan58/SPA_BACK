@@ -23,13 +23,13 @@ services:
       - key: DATABASE_URL
         fromService:
           type: pserv
-          name: SPA
+          name: spa-postgres
           property: connectionString
       # Redis connection string
       - key: REDIS_URL
         fromService:
           type: redis
-          name: SPA
+          name: spa-redis
           property: connectionString
       - key: OPENAI_API_KEY
         sync: false
@@ -78,13 +78,13 @@ services:
       - key: DATABASE_URL
         fromService:
           type: pserv
-          name: SPA
+          name: spa-postgres
           property: connectionString
       # Redis connection string
       - key: REDIS_URL
         fromService:
           type: redis
-          name: SPA
+          name: spa-redis
           property: connectionString
       - key: SECRET_KEY
         sync: false
@@ -118,12 +118,12 @@ services:
         value: https://my-frontend-app.onrender.com
 
   - type: redis
-    name: SPA
+    name: spa-redis
     region: oregon
-    plan: free
+    plan: starter
     ipAllowList: []
 
   - type: pserv
-    name: SPA
+    name: spa-postgres
     region: oregon
     plan: starter
