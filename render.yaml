@@ -133,7 +133,7 @@ services:
       - source: render
         description: other Render services
 
-  - type: psql
+  - type: pserv
     name: spa-postgres
     region: oregon
     plan: starter
