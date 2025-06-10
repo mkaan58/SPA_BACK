@@ -15,6 +15,15 @@ DATABASES = {
     )
 }
 
+ALLOWED_HOSTS = [
+    'https://my-backend-app-un2d.onrender.com',  # Backend domain
+    '127.0.0.1',
+    'localhost',
+    '.onrender.com',
+
+]
+
+
 # HTTPS settings
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True

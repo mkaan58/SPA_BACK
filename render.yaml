@@ -2,6 +2,7 @@ services:
   - type: web
     name: my-backend-app
     runtime: docker
+    repo: https://github.com/mkaan58/SPA_BACK
     region: oregon
     plan: starter
     dockerfilePath: ./Dockerfile.web
@@ -70,6 +71,7 @@ services:
   - type: worker
     name: celery-worker
     runtime: docker
+    repo: https://github.com/mkaan58/SPA_BACK
     region: oregon
     plan: starter
     dockerfilePath: ./Dockerfile.worker
