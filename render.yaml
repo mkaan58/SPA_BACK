@@ -17,11 +17,11 @@ services:
       - key: SECRET_KEY
         sync: false
       - key: ALLOWED_HOSTS
-        value: my-backend-app.onrender.com
+        value: my-backend-app-un2d.onrender.com,spa-front-o0yw.onrender.com,.onrender.com
       - key: CORS_ALLOWED_ORIGINS
-        value: https://my-frontend-app.onrender.com
+        value:  https://spa-front-o0yw.onrender.com,http://localhost:3000
       - key: FRONTEND_URL
-        value: https://my-frontend-app.onrender.com
+        value: https://spa-front-o0yw.onrender.com
       - key: REDIS_URL
         fromService:
           type: keyvalue
