@@ -1,0 +1,156 @@
+services:
+  - type: web
+    name: my-backend-app
+    env: docker
+    region: oregon
+    plan: starter
+    dockerfilePath: ./Dockerfile.web
+    autoDeploy: true
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: core.settings.prod
+      - key: PORT
+        value: 10000
+      - key: SECRET_KEY
+        sync: false
+      - key: ALLOWED_HOSTS
+        value: my-backend-app.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://my-frontend-app.onrender.com
+      - key: FRONTEND_URL
+        value: https://my-frontend-app.onrender.com
+      - key: DB_NAME
+        fromService:
+          name: my-postgres
+          property: database
+      - key: DB_USER
+        fromService:
+          name: my-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromService:
+          name: my-postgres
+          property: password
+      - key: DB_HOST
+        fromService:
+          name: my-postgres
+          property: host
+      - key: DB_PORT
+        fromService:
+          name: my-postgres
+          property: port
+      - key: REDIS_URL
+        fromService:
+          name: my-redis
+          property: connectionString
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_USE_TLS
+        value: True
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: GITHUB_ACCESS_TOKEN
+        sync: false
+      - key: VERCEL_ACCESS_TOKEN
+        sync: false
+      - key: UNSPLASH_ACCESS_KEY
+        value: -ioxRFuknRekKP0zxxFTAfu5PZj6n0-jIOQ_yzyRxdw
+      - key: LEMON_SQUEEZY_API_KEY
+        sync: false
+      - key: LEMON_SQUEEZY_STORE_ID
+        sync: false
+      - key: LEMON_SQUEEZY_WEBHOOK_SECRET
+        sync: false
+      - key: LEMON_SQUEEZY_CHECKOUT_URL
+        sync: false
+
+  - type: worker
+    name: celery-worker
+    env: docker
+    region: oregon
+    plan: starter
+    dockerfilePath: ./Dockerfile.worker
+    preDeployCommand: "python manage.py migrate --settings=core.settings.prod"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: core.settings.prod
+      - key: REDIS_URL
+        fromService:
+          name: my-redis
+          property: connectionString
+      - key: DB_NAME
+        fromService:
+          name: my-postgres
+          property: database
+      - key: DB_USER
+        fromService:
+          name: my-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromService:
+          name: my-postgres
+          property: password
+      - key: DB_HOST
+        fromService:
+          name: my-postgres
+          property: host
+      - key: DB_PORT
+        fromService:
+          name: my-postgres
+          property: port
+      - key: SECRET_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: LEMON_SQUEEZY_API_KEY
+        sync: false
+      - key: LEMON_SQUEEZY_STORE_ID
+        sync: false
+      - key: LEMON_SQUEEZY_WEBHOOK_SECRET
+        sync: false
+      - key: LEMON_SQUEEZY_CHECKOUT_URL
+        sync: false
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_USE_TLS
+        value: True
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        value: https://my-frontend-app.onrender.com
+
+  - type: redis
+    name: my-redis
+    region: oregon
+    plan: free
+    ipAllowList: [] # Sadece Render özel ağından erişime izin ver
+
+  - type: pserv
+    name: my-postgres
+    region: oregon
+    plan: free
+    disk:
+      name: postgres-data
+      sizeGB: 1

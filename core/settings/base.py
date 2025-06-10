@@ -14,6 +14,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-ps=5nj4rj4dih4(cc8b34a)t7922-ea1!r8&8#x3fbk(-ihkg!')
 
+DEBUG = True
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -72,6 +74,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -182,26 +185,156 @@ FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 
 
 
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'spa.services': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
-
-
-
-
-os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
+LEMON_SQUEEZY_API_KEY = os.environ.get('LEMON_SQUEEZY_API_KEY')
+LEMON_SQUEEZY_STORE_ID = os.environ.get('LEMON_SQUEEZY_STORE_ID')
+LEMON_SQUEEZY_WEBHOOK_SECRET = os.environ.get('LEMON_SQUEEZY_WEBHOOK_SECRET')
+LEMON_SQUEEZY_CHECKOUT_URL = os.environ.get('LEMON_SQUEEZY_CHECKOUT_URL')
 UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY', 'your_unsplash_access_key_here')
+
+# import os
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+    
+#     # Formatters - Log mesajlarının formatı
+#     'formatters': {
+#         'verbose': {
+#             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+#             'style': '{',
+#         },
+#         'simple': {
+#             'format': '{levelname} {message}',
+#             'style': '{',
+#         },
+#         'colored': {
+#             'format': '\033[92m[{asctime}]\033[0m \033[94m{levelname}\033[0m \033[93m{name}\033[0m: {message}',
+#             'style': '{',
+#         },
+#         'detailed': {
+#             'format': '🔍 [{asctime}] {levelname:8} {name:30} {funcName:20} L{lineno:3d}: {message}',
+#             'style': '{',
+#             'datefmt': '%Y-%m-%d %H:%M:%S'
+#         }
+#     },
+    
+#     # Handlers - Log mesajlarının nereye gideceği
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'detailed',
+#             'level': 'DEBUG',
+#         },
+#         'file': {
+#             'class': 'logging.FileHandler',
+#             'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
+#             'formatter': 'verbose',
+#             'level': 'DEBUG',
+#         },
+#         'error_file': {
+#             'class': 'logging.FileHandler',
+#             'filename': os.path.join(BASE_DIR, 'logs', 'errors.log'),
+#             'formatter': 'verbose',
+#             'level': 'ERROR',
+#         },
+#         'api_file': {
+#             'class': 'logging.FileHandler',
+#             'filename': os.path.join(BASE_DIR, 'logs', 'api.log'),
+#             'formatter': 'detailed',
+#             'level': 'DEBUG',
+#         }
+#     },
+    
+#     # Loggers - Hangi modülün logları nasıl işlenecek
+#     'loggers': {
+#         # Django'nun kendi logları
+#         'django': {
+#             'handlers': ['console', 'file'],
+#             'level': 'INFO',
+#             'propagate': False,
+#         },
+        
+#         # Django istekleri (her HTTP request)
+#         'django.request': {
+#             'handlers': ['console', 'error_file'],
+#             'level': 'DEBUG',
+#             'propagate': False,
+#         },
+        
+#         # Database sorguları
+#         'django.db.backends': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#             'propagate': False,
+#         },
+        
+#         # SPA services
+#         'spa.services': {
+#             'handlers': ['console', 'api_file'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+        
+#         # SPA API views
+#         'spa.api.views': {
+#             'handlers': ['console', 'api_file'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+        
+#         # SPA models
+#         'spa.models': {
+#             'handlers': ['console', 'api_file'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+        
+#         # Tüm SPA uygulaması
+#         'spa': {
+#             'handlers': ['console', 'api_file'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+        
+#         # Root logger - Tüm diğer loglar
+#         '': {
+#             'handlers': ['console', 'file'],
+#             'level': 'INFO',
+#         },
+#     },
+    
+#     # Root logger configuration
+#     'root': {
+#         'level': 'DEBUG',
+#         'handlers': ['console'],
+#     }
+# }
+
+# # Logs klasörünü oluştur
+# LOGS_DIR = os.path.join(BASE_DIR, 'logs')
+# if not os.path.exists(LOGS_DIR):
+#     os.makedirs(LOGS_DIR)
+
+# # Debug mode'da daha detaylı loglar
+# if DEBUG:
+#     # Console'da renklendirme
+#     LOGGING['handlers']['console']['formatter'] = 'colored'
+    
+#     # Tüm SQL sorgularını göster
+#     LOGGING['loggers']['django.db.backends']['level'] = 'DEBUG'
+    
+#     # Django debug toolbar logları
+#     LOGGING['loggers']['django.template'] = {
+#         'handlers': ['console'],
+#         'level': 'INFO',
+#         'propagate': False,
+#     }
+
+# # Production'da log seviyelerini artır
+# else:
+#     LOGGING['handlers']['console']['level'] = 'WARNING'
+#     LOGGING['loggers']['django']['level'] = 'WARNING'
+#     LOGGING['loggers']['django.request']['level'] = 'ERROR'
+
+
+# os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)

@@ -23,7 +23,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 # Frontend URL for development
 FRONTEND_URL = 'http://localhost:3000'
 
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'your_default_gemini_api_key')
+# GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'your_default_gemini_api_key')
 
 # Celery settings for development
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
