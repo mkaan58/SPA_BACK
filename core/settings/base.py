@@ -193,122 +193,122 @@ UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY', 'your_unsplash_access_key
 
 # import os
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
     
-#     # Formatters - Log mesajlarının formatı
-#     'formatters': {
-#         'verbose': {
-#             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-#             'style': '{',
-#         },
-#         'simple': {
-#             'format': '{levelname} {message}',
-#             'style': '{',
-#         },
-#         'colored': {
-#             'format': '\033[92m[{asctime}]\033[0m \033[94m{levelname}\033[0m \033[93m{name}\033[0m: {message}',
-#             'style': '{',
-#         },
-#         'detailed': {
-#             'format': '🔍 [{asctime}] {levelname:8} {name:30} {funcName:20} L{lineno:3d}: {message}',
-#             'style': '{',
-#             'datefmt': '%Y-%m-%d %H:%M:%S'
-#         }
-#     },
+    # Formatters - Log mesajlarının formatı
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+        'colored': {
+            'format': '\033[92m[{asctime}]\033[0m \033[94m{levelname}\033[0m \033[93m{name}\033[0m: {message}',
+            'style': '{',
+        },
+        'detailed': {
+            'format': '🔍 [{asctime}] {levelname:8} {name:30} {funcName:20} L{lineno:3d}: {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        }
+    },
     
-#     # Handlers - Log mesajlarının nereye gideceği
-#     'handlers': {
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#             'formatter': 'detailed',
-#             'level': 'DEBUG',
-#         },
-#         'file': {
-#             'class': 'logging.FileHandler',
-#             'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
-#             'formatter': 'verbose',
-#             'level': 'DEBUG',
-#         },
-#         'error_file': {
-#             'class': 'logging.FileHandler',
-#             'filename': os.path.join(BASE_DIR, 'logs', 'errors.log'),
-#             'formatter': 'verbose',
-#             'level': 'ERROR',
-#         },
-#         'api_file': {
-#             'class': 'logging.FileHandler',
-#             'filename': os.path.join(BASE_DIR, 'logs', 'api.log'),
-#             'formatter': 'detailed',
-#             'level': 'DEBUG',
-#         }
-#     },
+    # Handlers - Log mesajlarının nereye gideceği
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'detailed',
+            'level': 'DEBUG',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+        },
+        'error_file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'errors.log'),
+            'formatter': 'verbose',
+            'level': 'ERROR',
+        },
+        'api_file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'api.log'),
+            'formatter': 'detailed',
+            'level': 'DEBUG',
+        }
+    },
     
-#     # Loggers - Hangi modülün logları nasıl işlenecek
-#     'loggers': {
-#         # Django'nun kendi logları
-#         'django': {
-#             'handlers': ['console', 'file'],
-#             'level': 'INFO',
-#             'propagate': False,
-#         },
+    # Loggers - Hangi modülün logları nasıl işlenecek
+    'loggers': {
+        # Django'nun kendi logları
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
         
-#         # Django istekleri (her HTTP request)
-#         'django.request': {
-#             'handlers': ['console', 'error_file'],
-#             'level': 'DEBUG',
-#             'propagate': False,
-#         },
+        # Django istekleri (her HTTP request)
+        'django.request': {
+            'handlers': ['console', 'error_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
         
-#         # Database sorguları
-#         'django.db.backends': {
-#             'handlers': ['console'],
-#             'level': 'DEBUG',
-#             'propagate': False,
-#         },
+        # Database sorguları
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
         
-#         # SPA services
-#         'spa.services': {
-#             'handlers': ['console', 'api_file'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         },
+        # SPA services
+        'spa.services': {
+            'handlers': ['console', 'api_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         
-#         # SPA API views
-#         'spa.api.views': {
-#             'handlers': ['console', 'api_file'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         },
+        # SPA API views
+        'spa.api.views': {
+            'handlers': ['console', 'api_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         
-#         # SPA models
-#         'spa.models': {
-#             'handlers': ['console', 'api_file'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         },
+        # SPA models
+        'spa.models': {
+            'handlers': ['console', 'api_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         
-#         # Tüm SPA uygulaması
-#         'spa': {
-#             'handlers': ['console', 'api_file'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         },
+        # Tüm SPA uygulaması
+        'spa': {
+            'handlers': ['console', 'api_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         
-#         # Root logger - Tüm diğer loglar
-#         '': {
-#             'handlers': ['console', 'file'],
-#             'level': 'INFO',
-#         },
-#     },
+        # Root logger - Tüm diğer loglar
+        '': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+        },
+    },
     
-#     # Root logger configuration
-#     'root': {
-#         'level': 'DEBUG',
-#         'handlers': ['console'],
-#     }
-# }
+    # Root logger configuration
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['console'],
+    }
+}
 
 # # Logs klasörünü oluştur
 # LOGS_DIR = os.path.join(BASE_DIR, 'logs')

@@ -38,6 +38,81 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = RegisterSerializer
 
+# class GoogleLoginView(APIView):
+#     """
+#     Google ile sosyal giriş işlemlerini yöneten view.
+#     Google'dan gelen ID token'ı doğrular ve bu bilgilere dayanarak sisteme giriş yapar veya yeni hesap oluşturur.
+#     Token doğrulama için Google API'lerine bağlanır ve dönen bilgilere göre kullanıcı oluşturur veya günceller.
+#     Sosyal giriş ile gelen kullanıcılar için e-posta otomatik doğrulanmış kabul edilir ve JWT token oluşturularak dönülür.
+#     """
+#     authentication_classes = []  # Kimlik doğrulama gerekmez
+#     permission_classes = [permissions.AllowAny]  # İzin sınıfını ayarla
+    
+#     def post(self, request):
+#         token = request.data.get('token')
+#         if not token:
+#             return Response({"error": "Token is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+#         try:
+#             # Google'ın ID token'ını doğrula
+#             # @react-oauth/google, id_token gönderiyor, access_token değil
+#             google_response = requests.get(
+#                 'https://oauth2.googleapis.com/tokeninfo',
+#                 params={'id_token': token}
+#             )
+            
+#             if not google_response.ok:
+#                 return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+            
+#             google_data = google_response.json()
+            
+#             # Token doğruysa, kullanıcı email'inden bul veya oluştur
+#             email = google_data.get('email')
+#             if not email:
+#                 return Response({"error": "Email not provided by Google"}, status=status.HTTP_400_BAD_REQUEST)
+            
+#             # Bu kullanıcı zaten var mı diye kontrol et
+#             user = None
+#             try:
+#                 user = User.objects.get(email=email)
+#                 # Kullanıcı varsa, sosyal hesap olarak güncelle
+#                 user.is_social_account = True
+#                 user.social_provider = 'google'
+#                 user.save(update_fields=['social_provider'])
+#             except User.DoesNotExist:
+#                 # Kullanıcı yoksa yeni oluştur
+#                 name_parts = google_data.get('name', '').split(' ', 1)
+#                 first_name = name_parts[0] if name_parts else ''
+#                 last_name = name_parts[1] if len(name_parts) > 1 else ''
+                
+#                 user = User.objects.create(
+#                     email=email,
+#                     name=first_name,
+#                     surname=last_name,
+#                     email_verified=True,  # Google ile doğrulandı
+#                     social_provider='google',
+#                     is_active=True
+#                 )
+#                 # Kullanıcı sosyal girişle geldiği için password yok
+#                 user.set_unusable_password()
+#                 user.save()
+            
+#             # JWT token'ları oluştur
+#             refresh = RefreshToken.for_user(user)
+            
+#             # Kullanıcı verilerini hazırla
+#             user_data = UserSerializer(user).data
+#             user_data['access'] = str(refresh.access_token)
+#             user_data['refresh'] = str(refresh)
+            
+#             return Response(user_data, status=status.HTTP_200_OK)
+            
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+logger = logging.getLogger(__name__)
+
 class GoogleLoginView(APIView):
     """
     Google ile sosyal giriş işlemlerini yöneten view.
@@ -49,41 +124,92 @@ class GoogleLoginView(APIView):
     permission_classes = [permissions.AllowAny]  # İzin sınıfını ayarla
     
     def post(self, request):
+        # Request başlangıç logu
+        logger.info("🚀 ================ GOOGLE LOGIN REQUEST STARTED ================")
+        logger.info(f"📍 Request method: {request.method}")
+        logger.info(f"📍 Request path: {request.path}")
+        logger.info(f"📍 Request META host: {request.META.get('HTTP_HOST', 'Unknown')}")
+        logger.info(f"📍 Request META origin: {request.META.get('HTTP_ORIGIN', 'Unknown')}")
+        logger.info(f"📍 Request META user-agent: {request.META.get('HTTP_USER_AGENT', 'Unknown')}")
+        logger.info(f"📍 Request headers: {dict(request.headers)}")
+        
+        # Token kontrolü
         token = request.data.get('token')
+        logger.info(f"🔍 Token received: {'Yes' if token else 'No'}")
+        
         if not token:
+            logger.error("❌ Token is missing from request")
             return Response({"error": "Token is required"}, status=status.HTTP_400_BAD_REQUEST)
         
+        logger.info(f"🔍 Token length: {len(token) if token else 0}")
+        logger.info(f"🔍 Token first 50 chars: {token[:50] if token else 'None'}...")
+        logger.info(f"🔍 Token last 50 chars: ...{token[-50:] if token else 'None'}")
+        
         try:
+            # Google token doğrulama başlangıç
+            logger.info("🌐 ================ GOOGLE TOKEN VALIDATION STARTED ================")
+            google_url = 'https://oauth2.googleapis.com/tokeninfo'
+            params = {'id_token': token}
+            
+            logger.info(f"📡 Making request to Google API: {google_url}")
+            logger.info(f"📡 Request params: {params}")
+            
             # Google'ın ID token'ını doğrula
-            # @react-oauth/google, id_token gönderiyor, access_token değil
-            google_response = requests.get(
-                'https://oauth2.googleapis.com/tokeninfo',
-                params={'id_token': token}
-            )
+            google_response = requests.get(google_url, params=params, timeout=30)
+            
+            logger.info(f"📨 Google API response status: {google_response.status_code}")
+            logger.info(f"📨 Google API response headers: {dict(google_response.headers)}")
             
             if not google_response.ok:
+                logger.error(f"❌ Google API returned error: {google_response.status_code}")
+                logger.error(f"❌ Google API error text: {google_response.text}")
                 return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
             
             google_data = google_response.json()
+            logger.info("✅ Google token validation successful")
+            logger.info(f"🔍 Google data keys: {list(google_data.keys())}")
+            logger.info(f"🔍 Google email: {google_data.get('email', 'Not provided')}")
+            logger.info(f"🔍 Google name: {google_data.get('name', 'Not provided')}")
+            logger.info(f"🔍 Google email_verified: {google_data.get('email_verified', 'Not provided')}")
+            logger.info(f"🔍 Google aud (audience): {google_data.get('aud', 'Not provided')}")
+            logger.info(f"🔍 Google iss (issuer): {google_data.get('iss', 'Not provided')}")
             
-            # Token doğruysa, kullanıcı email'inden bul veya oluştur
+            # Email kontrolü
             email = google_data.get('email')
             if not email:
+                logger.error("❌ Email not provided by Google")
                 return Response({"error": "Email not provided by Google"}, status=status.HTTP_400_BAD_REQUEST)
             
-            # Bu kullanıcı zaten var mı diye kontrol et
+            logger.info(f"✅ Email received from Google: {email}")
+            
+            # Kullanıcı bulma/oluşturma işlemi
+            logger.info("👤 ================ USER LOOKUP/CREATE STARTED ================")
             user = None
+            user_created = False
+            
             try:
                 user = User.objects.get(email=email)
+                logger.info(f"✅ Existing user found: {user.email}")
+                logger.info(f"🔍 User ID: {user.id}")
+                logger.info(f"🔍 User is_active: {user.is_active}")
+                logger.info(f"🔍 User email_verified: {user.email_verified}")
+                logger.info(f"🔍 User social_provider: {getattr(user, 'social_provider', 'None')}")
+                
                 # Kullanıcı varsa, sosyal hesap olarak güncelle
                 user.is_social_account = True
                 user.social_provider = 'google'
                 user.save(update_fields=['social_provider'])
+                logger.info("✅ User updated as social account")
+                
             except User.DoesNotExist:
+                logger.info("👤 User does not exist, creating new user")
+                
                 # Kullanıcı yoksa yeni oluştur
                 name_parts = google_data.get('name', '').split(' ', 1)
                 first_name = name_parts[0] if name_parts else ''
                 last_name = name_parts[1] if len(name_parts) > 1 else ''
+                
+                logger.info(f"🔍 Parsed name - First: '{first_name}', Last: '{last_name}'")
                 
                 user = User.objects.create(
                     email=email,
@@ -96,19 +222,55 @@ class GoogleLoginView(APIView):
                 # Kullanıcı sosyal girişle geldiği için password yok
                 user.set_unusable_password()
                 user.save()
+                user_created = True
+                
+                logger.info(f"✅ New user created: {user.email} (ID: {user.id})")
             
-            # JWT token'ları oluştur
+            # JWT token oluşturma
+            logger.info("🔑 ================ JWT TOKEN GENERATION STARTED ================")
             refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            refresh_token = str(refresh)
+            
+            logger.info(f"✅ JWT tokens generated successfully")
+            logger.info(f"🔍 Access token length: {len(access_token)}")
+            logger.info(f"🔍 Refresh token length: {len(refresh_token)}")
+            logger.info(f"🔍 Access token first 50 chars: {access_token[:50]}...")
             
             # Kullanıcı verilerini hazırla
+            logger.info("📦 ================ RESPONSE PREPARATION STARTED ================")
             user_data = UserSerializer(user).data
-            user_data['access'] = str(refresh.access_token)
-            user_data['refresh'] = str(refresh)
+            user_data['access'] = access_token
+            user_data['refresh'] = refresh_token
             
+            logger.info(f"📦 Response user data keys: {list(user_data.keys())}")
+            logger.info(f"📦 Response user ID: {user_data.get('id')}")
+            logger.info(f"📦 Response user email: {user_data.get('email')}")
+            logger.info(f"📦 User created in this request: {user_created}")
+            
+            logger.info("🎉 ================ GOOGLE LOGIN SUCCESS ================")
             return Response(user_data, status=status.HTTP_200_OK)
             
+        except requests.RequestException as e:
+            logger.error("❌ ================ GOOGLE API REQUEST ERROR ================")
+            logger.error(f"❌ Request error type: {type(e).__name__}")
+            logger.error(f"❌ Request error message: {str(e)}")
+            logger.error(f"❌ Request error details: {repr(e)}")
+            return Response(
+                {"error": "Failed to validate token with Google"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error("❌ ================ GENERAL ERROR ================")
+            logger.error(f"❌ Error type: {type(e).__name__}")
+            logger.error(f"❌ Error message: {str(e)}")
+            logger.error(f"❌ Error details: {repr(e)}")
+            logger.exception("❌ Full error traceback:")
+            return Response(
+                {"error": "Internal server error"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class VerifyEmailView(APIView):
     """
