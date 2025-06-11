@@ -639,19 +639,23 @@ document.addEventListener('DOMContentLoaded', function() {{
       prevEl: '.swiper-button-prev',
     }},
     breakpoints: {{
-      320: {{
-        slidesPerView: 1,
-        spaceBetween: 15,
-      }},
-      640: {{
-        slidesPerView: 2,
-        spaceBetween: 20,
-      }},
-      1024: {{
-        slidesPerView: 3,
-        spaceBetween: 30,
-      }},
-    }},
+  320: {{
+    slidesPerView: 1,
+    spaceBetween: 15,
+  }},
+  768: {{
+    slidesPerView: 1,
+    spaceBetween: 20,
+  }},
+  1024: {{
+    slidesPerView: 2,
+    spaceBetween: 25,
+  }},
+  1280: {{
+    slidesPerView: 3,
+    spaceBetween: 30,
+  }},
+}},
     effect: 'slide',
     speed: 600,
     touchRatio: 1,
@@ -723,6 +727,27 @@ document.addEventListener('DOMContentLoaded', function() {{
   }}
 }}
 
+/* 🚨 CRITICAL: Prevent horizontal scroll */
+.swiper-container, .swiper {{
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+}}
+
+.swiper-wrapper {{
+  max-width: 100% !important;
+}}
+
+@media (max-width: 767px) {{
+  .swiper {{
+    margin: 0 !important;
+    padding: 0 15px !important;
+  }}
+  
+  .swiper-slide {{
+    width: 100% !important;
+    flex-shrink: 0 !important;
+  }}
+}}
 /* Hide navigation buttons on mobile */
 @media (max-width: 767px) {{
   .swiper-button-next,
@@ -763,16 +788,17 @@ MANDATORY: Prevent layout shifts and scrollbars caused by Typed.js:
 
 CRITICAL CSS (MANDATORY):
 ```css
-.typed-container 
+.typed-container {{
   min-width: 200px !important;
   overflow: hidden !important;
   white-space: nowrap !important;
+}}
 
-
-body, .container 
+body, .container {{
   overflow-x: hidden !important;
   max-width: 100vw !important;
-
+}}
+```
 ❌ DO NOT let Typed.js break responsive design
 ✅ ENSURE zero horizontal scroll on ANY device
 
