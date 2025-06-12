@@ -15,9 +15,26 @@ ALLOWED_HOSTS = [
 ]
 
 # Static files
+# STORAGES = {
+#     "staticfiles": {
+#         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+#     },
+# }
+
 STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {
+            "location": "/var/data",  # MEDIA_ROOT ile aynı olmalı
+            "base_url": "/media/",    # MEDIA_URL ile aynı olmalı
+        },
+    },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "OPTIONS": {
+            "location": os.path.join(BASE_DIR, 'staticfiles'),  # STATIC_ROOT ile aynı olmalı
+            "base_url": "/static/",                             # STATIC_URL ile aynı olmalı
+        },
     },
 }
 
