@@ -12,6 +12,11 @@ urlpatterns = [
 ]
 
 # Add static and media URLs for development
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# if settings.DEBUG:
+#     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+#     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if not settings.DEBUG: # DEBUG False iken çalışsın
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Genellikle statik dosyaları Whitenoise veya Nginx/Apache sunar, bu kısım zorunlu değil
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
