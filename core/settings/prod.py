@@ -21,22 +21,22 @@ ALLOWED_HOSTS = [
 #     },
 # }
 
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-        "OPTIONS": {
-            "location": "/var/data",  # MEDIA_ROOT ile aynı olmalı
-            "base_url": "/media/",    # MEDIA_URL ile aynı olmalı
-        },
-    },
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        "OPTIONS": {
-            "location": os.path.join(BASE_DIR, 'staticfiles'),  # STATIC_ROOT ile aynı olmalı
-            "base_url": "/static/",                             # STATIC_URL ile aynı olmalı
-        },
-    },
-}
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "django.core.files.storage.FileSystemStorage",
+#         "OPTIONS": {
+#             "location": "/var/data",  # MEDIA_ROOT ile aynı olmalı
+#             "base_url": "/media/",    # MEDIA_URL ile aynı olmalı
+#         },
+#     },
+#     "staticfiles": {
+#         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+#         "OPTIONS": {
+#             "location": os.path.join(BASE_DIR, 'staticfiles'),  # STATIC_ROOT ile aynı olmalı
+#             "base_url": "/static/",                             # STATIC_URL ile aynı olmalı
+#         },
+#     },
+# }
 
 # Database
 DATABASES = {
@@ -108,3 +108,59 @@ VERCEL_ACCESS_TOKEN = os.getenv('VERCEL_ACCESS_TOKEN')
 # UNSPLASH Configuration
 UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')
 
+
+
+
+
+
+
+
+
+
+# AWS S3 Ayarları
+# Bu bilgileri Render.com ortam değişkenleri olarak tanımlamalısınız!
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1') # S3 bucket'ınızın bölgesini buraya yazın, örn: 'eu-central-1'
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com' # S3 URL'si
+
+AWS_S3_USE_SSL = True
+AWS_S3_VERIFY = True # SSL sertifikasını doğrula
+
+# S3'e yüklenen MEDIA dosyaları için prefix
+AWS_MEDIA_LOCATION = 'media'
+
+# S3'e yüklenen STATIC dosyaları için prefix (Yeni ekledik!)
+AWS_STATIC_LOCATION = 'static'
+
+# STORAGES ayarları (Hem statik hem medya için S3)
+STORAGES = {
+    # Medya dosyaları için varsayılan depolama
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "location": AWS_MEDIA_LOCATION, # Medya dosyaları için 'media/' klasörüne yükle
+            "bucket_name": AWS_STORAGE_BUCKET_NAME,
+            "region_name": AWS_S3_REGION_NAME,
+            "querystring_auth": False, # URL'de yetkilendirme parametreleri oluşturma
+            "file_overwrite": False, # Aynı isimde dosya varsa üzerine yazma
+            # "default_acl": "public-read", # Eğer bucket policy kullanmıyorsanız ve genel okuma izni vermek istiyorsanız
+        }
+    },
+    # Statik dosyalar için depolama (Artık S3'i kullanıyoruz!)
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3StaticStorage", # statik dosyalar için S3StaticStorage kullan
+        "OPTIONS": {
+            "location": AWS_STATIC_LOCATION, # Statik dosyalar için 'static/' klasörüne yükle
+            "bucket_name": AWS_STORAGE_BUCKET_NAME,
+            "region_name": AWS_S3_REGION_NAME,
+            "querystring_auth": False,
+            # "default_acl": "public-read", # Eğer bucket policy kullanmıyorsanız ve genel okuma izni vermek istiyorsanız
+        }
+    },
+}
+
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/"
+
+STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/"
