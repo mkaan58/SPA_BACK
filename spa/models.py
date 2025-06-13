@@ -14,6 +14,9 @@ class Website(models.Model):
     original_user_prompt = models.TextField(blank=True)  # Orijinal kullanıcı promptu
     business_context = models.JSONField(default=dict, blank=True)  # İş bağlamı
     
+    custom_domain = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    custom_domain_verified = models.BooleanField(default=False)
+
     # Mevcut alanlar (değişiklik yok)
     primary_color = models.CharField(max_length=7, blank=True)
     secondary_color = models.CharField(max_length=7, blank=True)

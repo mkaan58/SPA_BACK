@@ -1419,3 +1419,97 @@ UPDATED PLAN:
             }
         })
     
+
+    @action(detail=True, methods=['post'])
+    def add_custom_domain(self, request, pk=None):
+        """Custom domain ekle"""
+        website = self.get_object()
+        
+        # Permission check
+        if website.user != request.user:
+            return Response({
+                'success': False,
+                'error': 'Bu website\'e erişim yetkiniz yok'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        domain_name = request.data.get('domain_name', '').strip().lower()
+        
+        if not domain_name:
+            return Response({
+                'success': False,
+                'error': 'Domain adı gerekli'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Basit domain formatı kontrolü
+        domain_pattern = r'^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.[a-zA-Z]{2,}$'
+        if not re.match(domain_pattern, domain_name):
+            return Response({
+                'success': False,
+                'error': 'Geçersiz domain formatı (örn: ornek.com)'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Domain service'i kullan
+        service = SimpleDomainService()
+        result = service.add_custom_domain(website.id, domain_name)
+        
+        if result['success']:
+            return Response(result, status=status.HTTP_201_CREATED)
+        else:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def verify_custom_domain(self, request, pk=None):
+        """Custom domain doğrula"""
+        website = self.get_object()
+        
+        # Permission check
+        if website.user != request.user:
+            return Response({
+                'success': False,
+                'error': 'Bu website\'e erişim yetkiniz yok'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        # Domain service'i kullan
+        service = SimpleDomainService()
+        result = service.verify_domain(website.id)
+        
+        return Response(result)
+
+    @action(detail=True, methods=['delete'])
+    def remove_custom_domain(self, request, pk=None):
+        """Custom domain kaldır"""
+        website = self.get_object()
+        
+        # Permission check
+        if website.user != request.user:
+            return Response({
+                'success': False,
+                'error': 'Bu website\'e erişim yetkiniz yok'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        # Domain service'i kullan
+        service = SimpleDomainService()
+        result = service.remove_domain(website.id)
+        
+        return Response(result)
+
+    @action(detail=False, methods=['get'])
+    def check_domain_availability(self, request):
+        """Domain müsaitlik kontrolü (opsiyonel)"""
+        domain_name = request.query_params.get('domain_name', '').strip().lower()
+        
+        if not domain_name:
+            return Response({
+                'success': False,
+                'error': 'Domain adı gerekli'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Sadece bizim sistemimizde kullanılıp kullanılmadığını kontrol et
+        is_taken = Website.objects.filter(custom_domain=domain_name).exists()
+        
+        return Response({
+            'success': True,
+            'domain': domain_name,
+            'available': not is_taken,
+            'message': 'Domain müsait' if not is_taken else 'Domain zaten kullanımda'
+        })

@@ -12,7 +12,7 @@ class WebsiteSerializer(serializers.ModelSerializer):
             'primary_color', 'secondary_color', 'accent_color', 'background_color',
             'theme', 'heading_font', 'body_font', 'corner_radius',
             'created_at', 'updated_at', 'custom_styles', 'element_contents',
-            'original_user_prompt', 'business_context'  # YENİ ALANLAR EKLE
+            'original_user_prompt', 'business_context','custom_domain','custom_domain_verified'  # YENİ ALANLAR EKLE
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
     
