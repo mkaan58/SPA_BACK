@@ -773,11 +773,191 @@ class WebsiteViewSet(viewsets.ModelViewSet):
                 'error': f"Failed to generate color palette: {str(e)}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    # @action(detail=False, methods=['post'], url_path='approve-plan/(?P<plan_id>[^/.]+)')
+    # def approve_plan(self, request, plan_id=None):
+    #     """
+    #     ENHANCED approve_plan - Uses background business intelligence tasks
+    #     """
+        
+    #     try:
+    #         design_plan = WebsiteDesignPlan.objects.get(id=plan_id, user=request.user)
+    #     except WebsiteDesignPlan.DoesNotExist:
+    #         return Response({'error': 'Design plan not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+    #     try:
+    #         user_theme = design_plan.design_preferences.get('theme', 'light')
+    #         primary_color = design_plan.design_preferences.get('primary_color', '#4B5EAA')
+    #         original_prompt = design_plan.original_prompt
+            
+    #         logger.info(f"📋 Enhanced approve_plan starting for: {plan_id}")
+            
+    #         # STEP 1: Extract business context in background
+    #         logger.info("🧠 Starting background business context extraction...")
+            
+    #         import hashlib
+    #         context_cache_key = f"business_context_{hashlib.md5(original_prompt.encode()).hexdigest()}"
+            
+    #         context_task = extract_business_context_task.apply_async(
+    #             args=[original_prompt, request.user.id, context_cache_key]
+    #         )
+            
+    #         # STEP 2: Generate color palette in background
+    #         logger.info("🎨 Starting background color palette generation...")
+            
+    #         palette_cache_key = f"color_palette_{primary_color}_{user_theme}_{request.user.id}"
+            
+    #         palette_task = generate_color_palette_task.apply_async(
+    #             args=[primary_color, user_theme, request.user.id, palette_cache_key]
+    #         )
+            
+    #         # STEP 3: Get results from background tasks
+    #         logger.info("⏳ Waiting for background tasks to complete...")
+            
+    #         # Get business context result
+    #         context_result = context_task.get(timeout=90)
+    #         if context_result.get('success'):
+    #             business_context = context_result['business_context']
+    #             logger.info(f"✅ Business context: {business_context.get('business_type', 'unknown')}")
+    #         else:
+    #             logger.error(f"Business context extraction failed: {context_result.get('error')}")
+    #             business_context = {'business_type': 'general_business', 'original_prompt': original_prompt}
+            
+    #         # Get color palette result
+    #         palette_result = palette_task.get(timeout=60)
+    #         if palette_result.get('success'):
+    #             color_palette = palette_result['color_palette']
+    #             accessibility_check = palette_result['accessibility_check']
+    #             logger.info(f"✅ Color palette generated: {palette_result['source']}")
+    #         else:
+    #             logger.error(f"Color palette generation failed: {palette_result.get('error')}")
+    #             # Fallback to existing color system
+    #             from spa.utils.color_utils import ColorHarmonySystem
+    #             color_palette = ColorHarmonySystem.generate_accessible_colors(primary_color, user_theme)
+    #             accessibility_check = ColorHarmonySystem.validate_accessibility(color_palette)
+            
+    #         # STEP 4: Generate photos in background
+    #         logger.info("🖼️ Starting background photo generation...")
+            
+    #         photo_task = generate_photos_task.apply_async(
+    #             args=[business_context, {}, request.user.id, plan_id]
+    #         )
+            
+    #         # Get photo results
+    #         photo_result = photo_task.get(timeout=180)  # Wait max 3 minutes
+            
+    #         if photo_result.get('success'):
+    #             context_images = photo_result['context_images']
+    #             image_generation_method = photo_result['generation_method']
+    #             logger.info(f"✅ Photos generated: {len(context_images)} images")
+    #         else:
+    #             logger.error(f"Photo generation failed: {photo_result.get('error')}")
+    #             # Use emergency fallback
+    #             context_images = self._get_emergency_unsplash_images(original_prompt)
+    #             image_generation_method = "emergency_fallback"
+            
+    #         # STEP 5: Continue with rest of approve_plan logic (same as before)
+    #         user_preferences = {
+    #             "theme": user_theme,
+    #             "primary_color": primary_color,
+    #             "font_type": design_plan.design_preferences.get('heading_font', 'modern'),
+    #             "website_prompt": design_plan.original_prompt,
+    #             "business_type": business_context.get('business_type', 'general_business')
+    #         }
+            
+    #         # Generate enhanced prompt (same as before)
+    #         from spa.api.approve_plan_prompt import generate_enhanced_prompt
+            
+    #         enhanced_prompt = generate_enhanced_prompt(
+    #             design_plan=design_plan,
+    #             context_images=context_images,
+    #             user_preferences=user_preferences,
+    #             color_palette=color_palette,
+    #             accessibility_check=accessibility_check,
+    #             image_generation_method=image_generation_method
+    #         )
+            
+    #         # Send to Gemini (same as before)
+    #         client = genai.Client(api_key=settings.GEMINI_API_KEY)
+    #         contents = [
+    #             types.Content(
+    #                 role="user",
+    #                 parts=[types.Part.from_text(text=enhanced_prompt)],
+    #             ),
+    #         ]
+            
+    #         response = client.models.generate_content(
+    #             model="gemini-2.5-flash-preview-05-20",
+    #             contents=contents,
+    #             config=types.GenerateContentConfig(response_mime_type="text/plain"),
+    #         )
+
+    #         # Create website (same as before)
+    #         website_data = {
+    #             'prompt': enhanced_prompt,
+    #             'original_user_prompt': original_prompt,
+    #             'business_context': business_context,
+    #             'contact_email': design_plan.design_preferences.get('contact_email', ''),
+    #             'primary_color': color_palette['primary'],
+    #             'secondary_color': color_palette['secondary'],
+    #             'accent_color': color_palette['accent'],
+    #             'background_color': color_palette['background'],
+    #             'theme': user_theme,
+    #             'heading_font': design_plan.design_preferences.get('heading_font', 'Playfair Display'),
+    #             'body_font': design_plan.design_preferences.get('body_font', 'Inter'),
+    #             'corner_radius': design_plan.design_preferences.get('corner_radius', 8)
+    #         }
+            
+    #         website_serializer = WebsiteCreateSerializer(data=website_data, context={'request': request})
+    #         website_serializer.is_valid(raise_exception=True)
+    #         website = website_serializer.save()
+            
+    #         # Process HTML content (same as before)
+    #         content = response.text.strip()
+            
+    #         if content.startswith("```html") and "```" in content[6:]:
+    #             content = content.replace("```html", "", 1)
+    #             content = content.rsplit("```", 1)[0].strip()
+    #         elif content.startswith("```") and content.endswith("```"):
+    #             content = content[3:-3].strip()
+            
+    #         if not content.startswith("<!DOCTYPE") and not content.startswith("<html"):
+    #             content = f"<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Generated Website</title>\n</head>\n<body>\n{content}\n</body>\n</html>"
+            
+    #         website.html_content = content
+    #         website.save()
+            
+    #         design_plan.is_approved = True
+    #         design_plan.save()
+            
+    #         logger.info(f"🎉 Website created successfully: {website.id}")
+            
+    #         return Response({
+    #             'website_id': website.id,
+    #             'status': 'website_created',
+    #             'message': f'Website created with {image_generation_method}',
+    #             'context_images': context_images,
+    #             'business_context': business_context,
+    #             'color_palette': color_palette,
+    #             'accessibility_scores': accessibility_check['scores'],
+    #             'image_generation_method': image_generation_method,
+    #             'processing_info': {
+    #                 'business_context_source': context_result.get('source', 'unknown'),
+    #                 'color_palette_source': palette_result.get('source', 'unknown'),
+    #                 'photo_generation_method': image_generation_method
+    #             }
+    #         }, status=status.HTTP_201_CREATED)
+            
+    #     except Exception as e:
+    #         logger.exception(f"❌ Error creating website: {str(e)}")
+    #         return Response({
+    #             'error': f"Failed to create website: {str(e)}"
+    #         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    # views.py - TAMAMEN DEĞİŞTİR
     @action(detail=False, methods=['post'], url_path='approve-plan/(?P<plan_id>[^/.]+)')
     def approve_plan(self, request, plan_id=None):
-        """
-        ENHANCED approve_plan - Uses background business intelligence tasks
-        """
+        """Background approve_plan with task monitoring"""
         
         try:
             design_plan = WebsiteDesignPlan.objects.get(id=plan_id, user=request.user)
@@ -785,174 +965,28 @@ class WebsiteViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Design plan not found'}, status=status.HTTP_404_NOT_FOUND)
         
         try:
-            user_theme = design_plan.design_preferences.get('theme', 'light')
-            primary_color = design_plan.design_preferences.get('primary_color', '#4B5EAA')
-            original_prompt = design_plan.original_prompt
+            # 🚀 Background task başlat
+            from spa.tasks import create_website_optimized
             
-            logger.info(f"📋 Enhanced approve_plan starting for: {plan_id}")
-            
-            # STEP 1: Extract business context in background
-            logger.info("🧠 Starting background business context extraction...")
-            
-            import hashlib
-            context_cache_key = f"business_context_{hashlib.md5(original_prompt.encode()).hexdigest()}"
-            
-            context_task = extract_business_context_task.apply_async(
-                args=[original_prompt, request.user.id, context_cache_key]
+            task = create_website_optimized.apply_async(
+                args=[plan_id, request.user.id]
             )
             
-            # STEP 2: Generate color palette in background
-            logger.info("🎨 Starting background color palette generation...")
+            logger.info(f"🚀 Website creation task started: {task.id} for plan {plan_id}")
             
-            palette_cache_key = f"color_palette_{primary_color}_{user_theme}_{request.user.id}"
-            
-            palette_task = generate_color_palette_task.apply_async(
-                args=[primary_color, user_theme, request.user.id, palette_cache_key]
-            )
-            
-            # STEP 3: Get results from background tasks
-            logger.info("⏳ Waiting for background tasks to complete...")
-            
-            # Get business context result
-            context_result = context_task.get(timeout=90)
-            if context_result.get('success'):
-                business_context = context_result['business_context']
-                logger.info(f"✅ Business context: {business_context.get('business_type', 'unknown')}")
-            else:
-                logger.error(f"Business context extraction failed: {context_result.get('error')}")
-                business_context = {'business_type': 'general_business', 'original_prompt': original_prompt}
-            
-            # Get color palette result
-            palette_result = palette_task.get(timeout=60)
-            if palette_result.get('success'):
-                color_palette = palette_result['color_palette']
-                accessibility_check = palette_result['accessibility_check']
-                logger.info(f"✅ Color palette generated: {palette_result['source']}")
-            else:
-                logger.error(f"Color palette generation failed: {palette_result.get('error')}")
-                # Fallback to existing color system
-                from spa.utils.color_utils import ColorHarmonySystem
-                color_palette = ColorHarmonySystem.generate_accessible_colors(primary_color, user_theme)
-                accessibility_check = ColorHarmonySystem.validate_accessibility(color_palette)
-            
-            # STEP 4: Generate photos in background
-            logger.info("🖼️ Starting background photo generation...")
-            
-            photo_task = generate_photos_task.apply_async(
-                args=[business_context, {}, request.user.id, plan_id]
-            )
-            
-            # Get photo results
-            photo_result = photo_task.get(timeout=180)  # Wait max 3 minutes
-            
-            if photo_result.get('success'):
-                context_images = photo_result['context_images']
-                image_generation_method = photo_result['generation_method']
-                logger.info(f"✅ Photos generated: {len(context_images)} images")
-            else:
-                logger.error(f"Photo generation failed: {photo_result.get('error')}")
-                # Use emergency fallback
-                context_images = self._get_emergency_unsplash_images(original_prompt)
-                image_generation_method = "emergency_fallback"
-            
-            # STEP 5: Continue with rest of approve_plan logic (same as before)
-            user_preferences = {
-                "theme": user_theme,
-                "primary_color": primary_color,
-                "font_type": design_plan.design_preferences.get('heading_font', 'modern'),
-                "website_prompt": design_plan.original_prompt,
-                "business_type": business_context.get('business_type', 'general_business')
-            }
-            
-            # Generate enhanced prompt (same as before)
-            from spa.api.approve_plan_prompt import generate_enhanced_prompt
-            
-            enhanced_prompt = generate_enhanced_prompt(
-                design_plan=design_plan,
-                context_images=context_images,
-                user_preferences=user_preferences,
-                color_palette=color_palette,
-                accessibility_check=accessibility_check,
-                image_generation_method=image_generation_method
-            )
-            
-            # Send to Gemini (same as before)
-            client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            contents = [
-                types.Content(
-                    role="user",
-                    parts=[types.Part.from_text(text=enhanced_prompt)],
-                ),
-            ]
-            
-            response = client.models.generate_content(
-                model="gemini-2.5-flash-preview-05-20",
-                contents=contents,
-                config=types.GenerateContentConfig(response_mime_type="text/plain"),
-            )
-
-            # Create website (same as before)
-            website_data = {
-                'prompt': enhanced_prompt,
-                'original_user_prompt': original_prompt,
-                'business_context': business_context,
-                'contact_email': design_plan.design_preferences.get('contact_email', ''),
-                'primary_color': color_palette['primary'],
-                'secondary_color': color_palette['secondary'],
-                'accent_color': color_palette['accent'],
-                'background_color': color_palette['background'],
-                'theme': user_theme,
-                'heading_font': design_plan.design_preferences.get('heading_font', 'Playfair Display'),
-                'body_font': design_plan.design_preferences.get('body_font', 'Inter'),
-                'corner_radius': design_plan.design_preferences.get('corner_radius', 8)
-            }
-            
-            website_serializer = WebsiteCreateSerializer(data=website_data, context={'request': request})
-            website_serializer.is_valid(raise_exception=True)
-            website = website_serializer.save()
-            
-            # Process HTML content (same as before)
-            content = response.text.strip()
-            
-            if content.startswith("```html") and "```" in content[6:]:
-                content = content.replace("```html", "", 1)
-                content = content.rsplit("```", 1)[0].strip()
-            elif content.startswith("```") and content.endswith("```"):
-                content = content[3:-3].strip()
-            
-            if not content.startswith("<!DOCTYPE") and not content.startswith("<html"):
-                content = f"<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Generated Website</title>\n</head>\n<body>\n{content}\n</body>\n</html>"
-            
-            website.html_content = content
-            website.save()
-            
-            design_plan.is_approved = True
-            design_plan.save()
-            
-            logger.info(f"🎉 Website created successfully: {website.id}")
-            
+            # ✅ Task ID'yi döndür - Frontend'in beklediği format
             return Response({
-                'website_id': website.id,
-                'status': 'website_created',
-                'message': f'Website created with {image_generation_method}',
-                'context_images': context_images,
-                'business_context': business_context,
-                'color_palette': color_palette,
-                'accessibility_scores': accessibility_check['scores'],
-                'image_generation_method': image_generation_method,
-                'processing_info': {
-                    'business_context_source': context_result.get('source', 'unknown'),
-                    'color_palette_source': palette_result.get('source', 'unknown'),
-                    'photo_generation_method': image_generation_method
-                }
-            }, status=status.HTTP_201_CREATED)
+                'status': 'processing',
+                'task_id': task.id,
+                'message': 'Website creation started in background',
+                'plan_id': plan_id
+            }, status=status.HTTP_202_ACCEPTED)
             
         except Exception as e:
-            logger.exception(f"❌ Error creating website: {str(e)}")
+            logger.exception(f"❌ Error starting website creation: {str(e)}")
             return Response({
-                'error': f"Failed to create website: {str(e)}"
+                'error': f"Failed to start website creation: {str(e)}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
     @action(detail=False, methods=['get'], url_path='task-status/(?P<task_id>[^/.]+)')
     def task_status(self, request, task_id=None):
