@@ -32,7 +32,7 @@ import asyncio
 from asgiref.sync import sync_to_async
 from concurrent.futures import ThreadPoolExecutor
 import threading
-
+from spa.tasks import *
 from .pagination import StandardResultsSetPagination  # Import pagination
 
 import asyncio
@@ -325,204 +325,41 @@ class WebsiteViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def analyze_prompt(self, request):
-        """Analyze user prompt and create detailed design plan"""
+        """Analyze user prompt and create detailed design plan - BACKGROUND VERSION"""
         serializer = AnalyzePromptSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
-        original_prompt = serializer.validated_data['prompt']  # YENİ: Original prompt'u sakla
-        
+        from spa.tasks import analyze_prompt_task
         try:
-            client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            
-            design_prefs = {
-                'primary_color': serializer.validated_data.get('primary_color', '#4B5EAA'),
-                'theme': serializer.validated_data.get('theme', 'light'),
-                'heading_font': serializer.validated_data.get('heading_font', 'Playfair Display'),
-                'body_font': serializer.validated_data.get('body_font', 'Inter'),
-                'corner_radius': serializer.validated_data.get('corner_radius', 8),
-                'contact_email': serializer.validated_data.get('contact_email', '')  # YENİ ALAN
-            }
-            
-            # YENİ: Business context extraction
-            # try:
-            #     business_context = asyncio.run(
-            #         direct_business_extractor.extract_business_context(original_prompt)
-            #     )
-            #     logger.info(f"✅ Business context extracted: {business_context.get('business_type', 'unknown')}")
-            # except Exception as e:
-            #     logger.error(f"❌ Business context extraction failed: {e}")
-            #     business_context = {}
-    #             BUSINESS CONTEXT DETECTED:
-    # {json.dumps(business_context, indent=2) if business_context else 'No specific business context detected'}
-            
-            analyze_prompt = f"""
-    You are a senior UI/UX designer and frontend developer. Analyze the user's website request and create a DETAILED design plan.
-
-    USER REQUEST:
-    {original_prompt}
-
-
-
-    DESIGN PREFERENCES:
-    - Primary Color: {design_prefs['primary_color']}
-    - Theme: {design_prefs['theme']}
-    - Heading Font: {design_prefs['heading_font']}
-    - Body Font: {design_prefs['body_font']}
-    - Corner Radius: {design_prefs['corner_radius']}px
-
-    Create a detailed design plan in the following format:
-
-    #Project Name: [General definition of the project, e.g. "Modern Portfolio Website"]
-    # 🎨 Website Design Plan
-
-    ## 📋 Project Summary
-    - **Website Type**: [portfolio/corporate/e-commerce/blog etc.]
-    - **Target Audience**: [who is this designed for]
-    - **Main Purpose**: [primary goal of the website]
-
-    ## 🔧 Technical Features
-    - **Responsive Design**: Mobile-first approach
-    - **Technologies**: HTML5, CSS3 (Tailwind), JavaScript (Alpine.js)
-    - **Performance**: Lazy loading, WebP images, optimized animations
-
-    ## 🎯 Page Structure and Sections
-
-    ### 1. 🏠 Navigation (Navbar)
-    - **Style**: [fixed/sticky/transparent start]
-    - **Menu Content**: [which links will be included]
-    - **Mobile Menu**: [hamburger menu features]
-    - **Logo Area**: [logo position and style]
-
-    ### 2. 🌟 Hero Section
-    - **Design Approach**: [full-screen/split/minimal]
-    - **Content Elements**: 
-      - Main title: [title content]
-      - Subtitle/description: [descriptive text]
-      - CTA Buttons: [which buttons]
-      - Visual Element: [image/video/animation]
-    - **Animations**: [fade-in, slide-up, lottie animations]
-
-    ### 3. 👤 About Section
-    - **Layout**: [two column/single column/card design]
-    - **Content**: [personal/corporate information]
-    - **Visual**: [profile photo/team photos]
-    - **Highlight Areas**: [information to emphasize]
-
-    ### 4. 💼 Portfolio/Projects Section
-    - **Grid Layout**: [3 columns desktop, 2 tablet, 1 mobile]
-    - **Filtering**: [category filters]
-    - **Hover Effects**: [zoom, overlay, shadow effects]
-    - **Lightbox**: [GLightbox modal viewing]
-    - **Project Count**: [how many projects to show]
-
-    ### 5. 🛠️ Services Section (if needed)
-    - **Card Design**: [icon + title + description]
-    - **Layout**: [grid/swiper slider]
-    - **Icon Usage**: [Material Icons/Font Awesome]
-
-    ### 6. 📞 Contact Section
-    - **Form Fields**: [name, email, message, phone etc.]
-    - **Validation**: [Alpine.js real-time validation]
-    - **Contact Info**: [email, phone, address]
-    - **Social Media**: [which platforms]
-
-    ### 7. 🔗 Footer
-    - **Content**: [copyright, social media, quick links]
-    - **Style**: [minimal/detailed]
-
-    ## 🎨 Color Palette and Design System
-
-    ### Smart Color Analysis
-    - **Primary Color**: {design_prefs['primary_color']}
-    - **Color Scheme Type**: [complementary/analogous/triadic/monochromatic - which type to choose and why]
-    - **Secondary Colors**: [AI-generated harmonious colors]
-    - **Accent Colors**: [emphasis colors]
-    - **Background Colors**: [background color gradations]
-    - **Text Colors**: [text colors - WCAG compliant]
-
-    ### Typography System
-    - **Headings**: {design_prefs['heading_font']} - [H1: 48px/32px, H2: 32px/24px]
-    - **Body Text**: {design_prefs['body_font']} - [16px base size]
-    - **Font Weights**: [400, 600, 700]
-
-    ### Design Elements
-    - **Corner Radius**: {design_prefs['corner_radius']}px [all rounded elements]
-    - **Spacing System**: [8px, 16px, 24px, 32px, 48px, 64px]
-    - **Shadow System**: [subtle shadows for depth]
-
-    ## ✨ Interactivity and Animations
-
-    ### Scroll Animations (AOS)
-    - **Hero**: [fade-in-up animation]
-    - **About**: [fade-in-left/right]
-    - **Portfolio**: [zoom-in animations]
-    - **Contact**: [fade-in-up]
-
-    ### Hover Effects
-    - **Buttons**: [scale + shadow + color transition]
-    - **Portfolio Items**: [image zoom + overlay fade]
-    - **Navigation**: [underline animation]
-
-    ### Micro Interactions
-    - **Form Focus**: [input field animations]
-    - **Loading States**: [button loading spinners]
-    - **Success Messages**: [slide-in notifications]
-
-    ## 📱 Responsive Behavior
-    - **Breakpoints**: [mobile: <768px, tablet: 768-1024px, desktop: >1024px]
-    - **Navigation**: [hamburger menu on mobile]
-    - **Typography**: [fluid typography scaling]
-    - **Images**: [responsive with proper aspect ratios]
-
-    ## 🚀 Performance Optimizations
-    - **Images**: [WebP format, lazy loading, proper sizing]
-    - **Animations**: [hardware acceleration, reduced motion respect]
-    - **Code**: [minified CSS/JS, CDN usage]
-
-    Do you like this plan? Would you like to change, add, or remove any sections?
-    """
-
-            contents = [
-                types.Content(
-                    role="user",
-                    parts=[types.Part.from_text(text=analyze_prompt)],
-                ),
-            ]
-            
-            generate_content_config = types.GenerateContentConfig(
-                response_mime_type="text/plain",
+            # Start background task immediately
+            task = analyze_prompt_task.apply_async(
+                args=[request.data, request.user.id]
             )
             
-            response = client.models.generate_content(
-                model="gemini-2.5-flash-preview-05-20",
-                contents=contents,
-                config=generate_content_config,
-            )
+            logger.info(f"🚀 analyze_prompt task started: {task.id} for user {request.user.id}")
             
-            design_plan = WebsiteDesignPlan.objects.create(
-                user=request.user,
-                original_prompt=original_prompt,  # YENİ: Original prompt sakla
-                current_plan=response.text.strip(),
-                design_preferences=design_prefs,
-                feedback_history=[]
-            )
+            # Get task result (this will wait for completion)
+            result = task.get(timeout=120)  # Wait max 2 minutes
             
-            return Response({
-                'plan_id': design_plan.id,
-                'design_plan': response.text.strip(),
-                # 'business_context': business_context,  # YENİ: Business context döndür
-                'status': 'plan_created'
-            }, status=status.HTTP_201_CREATED)
+            if result.get('success'):
+                return Response({
+                    'plan_id': result['plan_id'],
+                    'design_plan': result['design_plan'],
+                    'status': result['status']
+                }, status=status.HTTP_201_CREATED)
+            else:
+                return Response({
+                    'error': result.get('error', 'Task failed')
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
         except Exception as e:
-            logger.exception(f"Error analyzing prompt: {str(e)}")
+            logger.exception(f"❌ Error in analyze_prompt: {str(e)}")
             return Response({
                 'error': f"Failed to analyze prompt: {str(e)}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'], url_path='update-plan/(?P<plan_id>[^/.]+)')
     def update_plan(self, request, plan_id=None):
-        """Update design plan based on user feedback"""
+        """Update design plan based on user feedback - BACKGROUND VERSION"""
         try:
             design_plan = WebsiteDesignPlan.objects.get(id=plan_id, user=request.user)
         except WebsiteDesignPlan.DoesNotExist:
@@ -530,62 +367,82 @@ class WebsiteViewSet(viewsets.ModelViewSet):
         
         serializer = UpdatePlanSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+        from spa.tasks import update_plan_task
         try:
-            client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            
-            feedback_history = design_plan.feedback_history
-            feedback_history.append(serializer.validated_data['feedback'])
-            
-            update_prompt = f"""
-You are a senior UI/UX designer. You previously created a design plan and now have user feedback.
-
-CURRENT DESIGN PLAN:
-{design_plan.current_plan}
-
-USER FEEDBACK:
-{serializer.validated_data['feedback']}
-
-PREVIOUS FEEDBACK HISTORY:
-{chr(10).join(feedback_history[:-1]) if len(feedback_history) > 1 else 'First feedback'}
-
-Please update the design plan based on the user's feedback. Only make the specified changes, keep other sections as they are. Return the updated plan in the same Markdown format.
-
-If the user wants a new section added, place it in the appropriate location and add details.
-If they want to modify an existing section, only update that part.
-If they want a feature removed, remove that feature.
-
-UPDATED PLAN:
-"""
-
-            contents = [
-                types.Content(
-                    role="user",
-                    parts=[types.Part.from_text(text=update_prompt)],
-                ),
-            ]
-            
-            response = client.models.generate_content(
-                model="gemini-2.5-flash-preview-05-20",
-                # model="gemini-2.5-pro-preview-06-05",
-                contents=contents,
-                config=types.GenerateContentConfig(response_mime_type="text/plain"),
+            # Start background task
+            task = update_plan_task.apply_async(
+                args=[plan_id, serializer.validated_data['feedback'], request.user.id]
             )
             
-            design_plan.current_plan = response.text.strip()
-            design_plan.feedback_history = feedback_history
-            design_plan.save()
+            logger.info(f"🚀 update_plan task started: {task.id} for plan {plan_id}")
             
-            return Response({
-                'plan_id': design_plan.id,
-                'design_plan': response.text.strip(),
-                'status': 'plan_updated'
-            }, status=status.HTTP_200_OK)
+            # Get task result (wait for completion)
+            result = task.get(timeout=90)  # Wait max 1.5 minutes
+            
+            if result.get('success'):
+                return Response({
+                    'plan_id': result['plan_id'],
+                    'design_plan': result['design_plan'],
+                    'status': result['status']
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'error': result.get('error', 'Task failed')
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
         except Exception as e:
-            logger.exception(f"Error updating plan: {str(e)}")
+            logger.exception(f"❌ Error in update_plan: {str(e)}")
             return Response({
                 'error': f"Failed to update plan: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['post'])
+    def ai_line_edit(self, request, pk=None):
+        """Line-based AI editing endpoint - BACKGROUND VERSION"""
+        website = self.get_object()
+        
+        try:
+            user_request = request.data.get('user_request', '').strip()
+            if not user_request:
+                return Response({
+                    'error': 'User request is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            logger.info(f"🤖 AI Line Edit task starting: {user_request[:100]}...")
+            
+            # Start background task
+            task = ai_line_edit_task.apply_async(
+                args=[website.id, user_request, request.user.id]
+            )
+            
+            logger.info(f"🚀 ai_line_edit task started: {task.id} for website {website.id}")
+            
+            # Get task result (wait for completion)
+            result = task.get(timeout=150)  # Wait max 2.5 minutes
+            
+            if result.get('success'):
+                return Response({
+                    'success': True,
+                    'modified_html': result['modified_html'],
+                    'analysis': result['analysis'],
+                    'changes_applied': result['changes_applied'],
+                    'summary': result['summary'],
+                    'html_actually_changed': result['html_actually_changed'],
+                    'original_html_length': result['original_html_length'],
+                    'modified_html_length': result['modified_html_length'],
+                    'database_save_verified': True
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'error': result.get('error', 'AI edit task failed'),
+                    'user_request': user_request[:100]
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+        except Exception as e:
+            logger.exception(f"❌ Error in ai_line_edit: {str(e)}")
+            return Response({
+                'error': f'Line-based AI edit failed: {str(e)}',
+                'user_request': user_request[:100] if 'user_request' in locals() else 'Unknown'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
@@ -761,22 +618,165 @@ UPDATED PLAN:
     #         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+    @action(detail=True, methods=['post'], parser_classes=[MultiPartParser, FormParser])
+    def upload_image(self, request, pk=None):
+        """Upload and process image - BACKGROUND VERSION"""
+        website = self.get_object()
+        
+        try:
+            image_file = request.FILES.get('image')
+            if not image_file:
+                return Response({
+                    "error": "No image file provided"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            title = request.data.get('title', image_file.name)
+            
+            # Prepare image data for task
+            image_data = {
+                'image_file': image_file
+            }
+            
+            metadata = {
+                'title': title
+            }
+            
+            logger.info(f"🖼️ Image upload task starting: {image_file.name}")
+            
+            # Start background task
+            task = upload_image_task.apply_async(
+                args=[image_data, metadata, request.user.id, website.id]
+            )
+            
+            logger.info(f"🚀 upload_image task started: {task.id} for website {website.id}")
+            
+            # Get task result (wait for completion)
+            result = task.get(timeout=120)  # Wait max 2 minutes
+            
+            if result.get('success'):
+                # Create response in same format as original
+                uploaded_image = UploadedImage.objects.get(id=result['image_id'])
+                serializer = UploadedImageSerializer(uploaded_image, context={'request': request})
+                
+                return Response({
+                    **serializer.data,
+                    'processing_info': {
+                        'optimized': result.get('optimized', False),
+                        'file_size': result.get('file_size', 0)
+                    }
+                }, status=status.HTTP_201_CREATED)
+            else:
+                return Response({
+                    'error': result.get('error', 'Image upload failed')
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+        except Exception as e:
+            logger.exception(f"❌ Error uploading image: {str(e)}")
+            return Response({
+                'error': f"Failed to upload image: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # Update the approve_plan method to use background photo generation
+
+    @action(detail=False, methods=['post'])
+    def extract_business_context(self, request):
+        """Extract business context from prompt - BACKGROUND VERSION"""
+        
+        prompt = request.data.get('prompt', '').strip()
+        if not prompt:
+            return Response({
+                'error': 'Prompt is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Create cache key for this prompt
+            import hashlib
+            cache_key = f"business_context_{hashlib.md5(prompt.encode()).hexdigest()}"
+            
+            # Start background task
+            task = extract_business_context_task.apply_async(
+                args=[prompt, request.user.id, cache_key]
+            )
+            
+            logger.info(f"🧠 extract_business_context task started: {task.id}")
+            
+            # Get task result (wait for completion)
+            result = task.get(timeout=60)  # Wait max 1 minute
+            
+            if result.get('success'):
+                return Response({
+                    'success': True,
+                    'business_context': result['business_context'],
+                    'source': result['source'],
+                    'confidence': result['business_context'].get('confidence', 0.5)
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'error': result.get('error', 'Business context extraction failed')
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+        except Exception as e:
+            logger.exception(f"❌ Error extracting business context: {str(e)}")
+            return Response({
+                'error': f"Failed to extract business context: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # NEW METHOD: Generate color palette endpoint
+    @action(detail=False, methods=['post'])
+    def generate_color_palette(self, request):
+        """Generate accessible color palette - BACKGROUND VERSION"""
+        
+        primary_color = request.data.get('primary_color', '#4B5EAA')
+        theme = request.data.get('theme', 'light')
+        
+        # Validate inputs
+        if not re.match(r'^#[0-9A-Fa-f]{6}$', primary_color):
+            return Response({
+                'error': 'Invalid primary color format (use #RRGGBB)'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if theme not in ['light', 'dark']:
+            return Response({
+                'error': 'Theme must be either "light" or "dark"'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Create cache key
+            cache_key = f"color_palette_{primary_color}_{theme}_{request.user.id}"
+            
+            # Start background task
+            task = generate_color_palette_task.apply_async(
+                args=[primary_color, theme, request.user.id, cache_key]
+            )
+            
+            logger.info(f"🎨 generate_color_palette task started: {task.id}")
+            
+            # Get task result (wait for completion)
+            result = task.get(timeout=30)  # Wait max 30 seconds
+            
+            if result.get('success'):
+                return Response({
+                    'success': True,
+                    'color_palette': result['color_palette'],
+                    'accessibility_check': result['accessibility_check'],
+                    'source': result['source'],
+                    'optimization_info': result.get('optimization_info', {})
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'error': result.get('error', 'Color palette generation failed')
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+        except Exception as e:
+            logger.exception(f"❌ Error generating color palette: {str(e)}")
+            return Response({
+                'error': f"Failed to generate color palette: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     @action(detail=False, methods=['post'], url_path='approve-plan/(?P<plan_id>[^/.]+)')
     def approve_plan(self, request, plan_id=None):
         """
-        OPTIMIZED approve_plan - Same functionality, 50-60% faster
-        
-        CHANGES:
-        1. Background processing for instant UI response
-        2. Smart caching for repeated similar requests
-        3. Better async execution
-        
-        NO CHANGES:
-        - Same business_context extraction
-        - Same photo generation quality
-        - Same color system
-        - Same Gemini model and prompts
-        - Same final HTML quality
+        ENHANCED approve_plan - Uses background business intelligence tasks
         """
         
         try:
@@ -784,22 +784,174 @@ UPDATED PLAN:
         except WebsiteDesignPlan.DoesNotExist:
             return Response({'error': 'Design plan not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        # ✅ OPTIMIZATION: Start background task for heavy processing
-        from spa.tasks import create_website_optimized
-        
-        task = create_website_optimized.apply_async(
-            args=[plan_id, request.user.id],
-            countdown=1
-        )
-        
-        # ✅ INSTANT RESPONSE - User doesn't wait
-        return Response({
-            'status': 'processing',
-            'task_id': task.id,
-            'message': 'Website creation started',
-            'estimated_time': 'Processing in background...',
-            'poll_url': f'/api/websites/task-status/{task.id}/'
-        }, status=status.HTTP_202_ACCEPTED)
+        try:
+            user_theme = design_plan.design_preferences.get('theme', 'light')
+            primary_color = design_plan.design_preferences.get('primary_color', '#4B5EAA')
+            original_prompt = design_plan.original_prompt
+            
+            logger.info(f"📋 Enhanced approve_plan starting for: {plan_id}")
+            
+            # STEP 1: Extract business context in background
+            logger.info("🧠 Starting background business context extraction...")
+            
+            import hashlib
+            context_cache_key = f"business_context_{hashlib.md5(original_prompt.encode()).hexdigest()}"
+            
+            context_task = extract_business_context_task.apply_async(
+                args=[original_prompt, request.user.id, context_cache_key]
+            )
+            
+            # STEP 2: Generate color palette in background
+            logger.info("🎨 Starting background color palette generation...")
+            
+            palette_cache_key = f"color_palette_{primary_color}_{user_theme}_{request.user.id}"
+            
+            palette_task = generate_color_palette_task.apply_async(
+                args=[primary_color, user_theme, request.user.id, palette_cache_key]
+            )
+            
+            # STEP 3: Get results from background tasks
+            logger.info("⏳ Waiting for background tasks to complete...")
+            
+            # Get business context result
+            context_result = context_task.get(timeout=90)
+            if context_result.get('success'):
+                business_context = context_result['business_context']
+                logger.info(f"✅ Business context: {business_context.get('business_type', 'unknown')}")
+            else:
+                logger.error(f"Business context extraction failed: {context_result.get('error')}")
+                business_context = {'business_type': 'general_business', 'original_prompt': original_prompt}
+            
+            # Get color palette result
+            palette_result = palette_task.get(timeout=60)
+            if palette_result.get('success'):
+                color_palette = palette_result['color_palette']
+                accessibility_check = palette_result['accessibility_check']
+                logger.info(f"✅ Color palette generated: {palette_result['source']}")
+            else:
+                logger.error(f"Color palette generation failed: {palette_result.get('error')}")
+                # Fallback to existing color system
+                from spa.utils.color_utils import ColorHarmonySystem
+                color_palette = ColorHarmonySystem.generate_accessible_colors(primary_color, user_theme)
+                accessibility_check = ColorHarmonySystem.validate_accessibility(color_palette)
+            
+            # STEP 4: Generate photos in background
+            logger.info("🖼️ Starting background photo generation...")
+            
+            photo_task = generate_photos_task.apply_async(
+                args=[business_context, {}, request.user.id, plan_id]
+            )
+            
+            # Get photo results
+            photo_result = photo_task.get(timeout=180)  # Wait max 3 minutes
+            
+            if photo_result.get('success'):
+                context_images = photo_result['context_images']
+                image_generation_method = photo_result['generation_method']
+                logger.info(f"✅ Photos generated: {len(context_images)} images")
+            else:
+                logger.error(f"Photo generation failed: {photo_result.get('error')}")
+                # Use emergency fallback
+                context_images = self._get_emergency_unsplash_images(original_prompt)
+                image_generation_method = "emergency_fallback"
+            
+            # STEP 5: Continue with rest of approve_plan logic (same as before)
+            user_preferences = {
+                "theme": user_theme,
+                "primary_color": primary_color,
+                "font_type": design_plan.design_preferences.get('heading_font', 'modern'),
+                "website_prompt": design_plan.original_prompt,
+                "business_type": business_context.get('business_type', 'general_business')
+            }
+            
+            # Generate enhanced prompt (same as before)
+            from spa.api.approve_plan_prompt import generate_enhanced_prompt
+            
+            enhanced_prompt = generate_enhanced_prompt(
+                design_plan=design_plan,
+                context_images=context_images,
+                user_preferences=user_preferences,
+                color_palette=color_palette,
+                accessibility_check=accessibility_check,
+                image_generation_method=image_generation_method
+            )
+            
+            # Send to Gemini (same as before)
+            client = genai.Client(api_key=settings.GEMINI_API_KEY)
+            contents = [
+                types.Content(
+                    role="user",
+                    parts=[types.Part.from_text(text=enhanced_prompt)],
+                ),
+            ]
+            
+            response = client.models.generate_content(
+                model="gemini-2.5-flash-preview-05-20",
+                contents=contents,
+                config=types.GenerateContentConfig(response_mime_type="text/plain"),
+            )
+
+            # Create website (same as before)
+            website_data = {
+                'prompt': enhanced_prompt,
+                'original_user_prompt': original_prompt,
+                'business_context': business_context,
+                'contact_email': design_plan.design_preferences.get('contact_email', ''),
+                'primary_color': color_palette['primary'],
+                'secondary_color': color_palette['secondary'],
+                'accent_color': color_palette['accent'],
+                'background_color': color_palette['background'],
+                'theme': user_theme,
+                'heading_font': design_plan.design_preferences.get('heading_font', 'Playfair Display'),
+                'body_font': design_plan.design_preferences.get('body_font', 'Inter'),
+                'corner_radius': design_plan.design_preferences.get('corner_radius', 8)
+            }
+            
+            website_serializer = WebsiteCreateSerializer(data=website_data, context={'request': request})
+            website_serializer.is_valid(raise_exception=True)
+            website = website_serializer.save()
+            
+            # Process HTML content (same as before)
+            content = response.text.strip()
+            
+            if content.startswith("```html") and "```" in content[6:]:
+                content = content.replace("```html", "", 1)
+                content = content.rsplit("```", 1)[0].strip()
+            elif content.startswith("```") and content.endswith("```"):
+                content = content[3:-3].strip()
+            
+            if not content.startswith("<!DOCTYPE") and not content.startswith("<html"):
+                content = f"<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Generated Website</title>\n</head>\n<body>\n{content}\n</body>\n</html>"
+            
+            website.html_content = content
+            website.save()
+            
+            design_plan.is_approved = True
+            design_plan.save()
+            
+            logger.info(f"🎉 Website created successfully: {website.id}")
+            
+            return Response({
+                'website_id': website.id,
+                'status': 'website_created',
+                'message': f'Website created with {image_generation_method}',
+                'context_images': context_images,
+                'business_context': business_context,
+                'color_palette': color_palette,
+                'accessibility_scores': accessibility_check['scores'],
+                'image_generation_method': image_generation_method,
+                'processing_info': {
+                    'business_context_source': context_result.get('source', 'unknown'),
+                    'color_palette_source': palette_result.get('source', 'unknown'),
+                    'photo_generation_method': image_generation_method
+                }
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            logger.exception(f"❌ Error creating website: {str(e)}")
+            return Response({
+                'error': f"Failed to create website: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
     @action(detail=False, methods=['get'], url_path='task-status/(?P<task_id>[^/.]+)')
@@ -870,27 +1022,7 @@ UPDATED PLAN:
         
         logger.info(f"🆘 Emergency images generated: {len(emergency_images)}")
         return emergency_images
-    
-    def _extract_business_type(self, prompt: str) -> str:
-        """Prompt'tan iş türünü çıkar"""
-        business_keywords = {
-            'restaurant': ['restaurant', 'cafe', 'food', 'dining'],
-            'tech': ['technology', 'software', 'app', 'digital'],
-            'consulting': ['consulting', 'advisory', 'service'],
-            'creative': ['design', 'creative', 'art', 'photography'],
-            'healthcare': ['health', 'medical', 'clinic', 'wellness'],
-            'education': ['education', 'school', 'course', 'learning'],
-            'retail': ['shop', 'store', 'retail', 'product'],
-            'finance': ['finance', 'bank', 'investment', 'money']
-        }
-        
-        prompt_lower = prompt.lower()
-        for business_type, keywords in business_keywords.items():
-            if any(keyword in prompt_lower for keyword in keywords):
-                return business_type
-        
-        return 'general business'
-    
+
     def _calculate_hue_rotation(self, color: str) -> int:
         """Renk için hue rotation değeri hesapla"""
         # Basit bir implementasyon, geliştirilmeye açık
@@ -925,27 +1057,6 @@ UPDATED PLAN:
     
 
         
-    @action(detail=True, methods=['post'], parser_classes=[MultiPartParser, FormParser])
-    def upload_image(self, request, pk=None):
-        website = self.get_object()
-        try:
-            image_file = request.FILES.get('image')
-            if not image_file:
-                return Response({"error": "No image file provided"}, status=status.HTTP_400_BAD_REQUEST)
-            title = request.data.get('title', image_file.name)
-            uploaded_image = UploadedImage.objects.create(
-                user=request.user,
-                website=website,
-                image=image_file,
-                title=title
-            )
-            serializer = UploadedImageSerializer(uploaded_image, context={'request': request})
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            logger.exception(f"Error uploading image: {str(e)}")
-            return Response({
-                'error': f"Failed to upload image: {str(e)}"
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['get'])
     def images(self, request, pk=None):
@@ -1061,371 +1172,9 @@ UPDATED PLAN:
         return True
 
 
-        # Add to WebsiteViewSet
-
-    @action(detail=True, methods=['post'])
-    def ai_line_edit(self, request, pk=None):
-        """Line-based AI editing endpoint with save verification"""
-        start_time = time.time()
-        website = self.get_object()
-        
-        try:
-            user_request = request.data.get('user_request', '').strip()
-            if not user_request:
-                return Response({
-                    'error': 'User request is required'
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            logger.info(f"🤖 Line-based AI Edit: {user_request[:100]}...")
-            
-            # Store original HTML for comparison
-            original_html = website.html_content
-            original_length = len(original_html)
-            
-            # Initialize line-based editor
-            editor = LineBasedAIEditor()
-            
-            # Prepare context
-            ai_prompt = editor.prepare_line_context(website.html_content, user_request)
-            
-            # Send to AI with enhanced error handling
-            try:
-                client = genai.Client(api_key=settings.GEMINI_API_KEY)
-                
-                enhanced_ai_prompt = ai_prompt + """
-
-    CRITICAL: Your response must be VALID JSON starting with { and ending with }.
-    Do not include any text before or after the JSON.
-    Do not use markdown code blocks.
-    Do not include explanations outside the JSON.
-
-    Example valid response:
-    {"analysis": "Adding phone field to contact form", "line_changes": [{"start_line": 45, "end_line": 55, "reason": "Replace form HTML", "new_content": "<form>...</form>"}], "summary": "Added phone field successfully"}
-    """
-                
-                contents = [
-                    types.Content(
-                        role="user",
-                        parts=[types.Part.from_text(text=enhanced_ai_prompt)],
-                    ),
-                ]
-
-                generate_content_config = types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    temperature=0.1,
-                    max_output_tokens=6000,
-                    candidate_count=1,
-                    top_k=1,
-                    top_p=0.8,
-                )
-
-                response = client.models.generate_content(
-                    model="gemini-2.5-flash-preview-05-20",
-                    contents=contents,
-                    config=generate_content_config,
-                )
-                
-                if not response or not response.text:
-                    logger.error("❌ AI service returned empty response")
-                    return Response({
-                        'error': 'AI service returned empty response'
-                    }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-                
-                raw_response = response.text.strip()
-                logger.info(f"🔍 Raw AI Response (first 300 chars): {raw_response[:300]}")
-                
-            except Exception as ai_error:
-                logger.error(f"❌ AI Error: {ai_error}")
-                return Response({
-                    'error': f'AI service error: {str(ai_error)}'
-                }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-            
-            # Enhanced AI response parsing
-            try:
-                ai_response = json.loads(raw_response)
-                logger.info("✅ Direct JSON parsing successful")
-                
-            except json.JSONDecodeError as parse_error:
-                logger.error(f"❌ JSON parse error: {parse_error}")
-                return Response({
-                    'error': 'AI returned invalid JSON format',
-                    'raw_response': raw_response[:500],
-                    'parse_error': str(parse_error)
-                }, status=status.HTTP_502_BAD_GATEWAY)
-            
-            # Validate AI response structure
-            if not isinstance(ai_response, dict):
-                return Response({
-                    'error': 'AI response is not a valid object',
-                    'response_type': str(type(ai_response))
-                }, status=status.HTTP_502_BAD_GATEWAY)
-            
-            if 'line_changes' not in ai_response:
-                logger.warning("⚠️ AI response missing line_changes, adding empty array")
-                ai_response['line_changes'] = []
-            
-            # Apply line changes
-            try:
-                if ai_response['line_changes']:
-                    modified_html = editor.apply_line_changes(ai_response['line_changes'])
-                    
-                    # ✅ AKILLI YAPISAL KONTROL
-                    validation_result = self.validate_html_structure(original_html, modified_html, user_request)
-                    
-                    if not validation_result['valid']:
-                        logger.error(f"❌ Structure validation failed: {validation_result['errors']}")
-                        return Response({
-                            'error': 'AI broke critical HTML structure',
-                            'validation_errors': validation_result['errors'],
-                            'warnings': validation_result['warnings'],
-                            'suggestion': 'AI made unsafe changes. Try a more specific command.',
-                            'user_request': user_request,
-                            'recovery_tip': 'Use manual edit mode or refresh the page to restore.'
-                        }, status=status.HTTP_400_BAD_REQUEST)
-                    
-                    # Warnings varsa log'la ama devam et
-                    if validation_result['warnings']:
-                        logger.warning(f"⚠️ Structure warnings: {validation_result['warnings']}")
-                    
-                    # Comprehensive HTML validation
-                    if not modified_html or not modified_html.strip():
-                        raise ValueError("Modified HTML is empty")
-                    
-                    if '<html' not in modified_html.lower():
-                        raise ValueError("Modified HTML missing <html> tag")
-                    
-                    if '</html>' not in modified_html.lower():
-                        raise ValueError("Modified HTML missing closing </html> tag")
-                    
-                    # **CRITICAL: SAVE TO DATABASE**
-                    logger.info("💾 Saving modified HTML to database...")
-                    website.html_content = modified_html
-                    website.save(update_fields=['html_content'])
-                    
-                    # **VERIFY SAVE OPERATION**
-                    website.refresh_from_db()
-                    saved_html = website.html_content
-                    saved_length = len(saved_html)
-                    
-                    if saved_html != modified_html:
-                        logger.error("❌ Database save verification failed - content mismatch!")
-                        return Response({
-                            'error': 'Failed to save changes to database - content mismatch',
-                            'expected_length': len(modified_html),
-                            'saved_length': saved_length
-                        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                    
-                    logger.info(f"✅ Database save verified: {original_length} -> {saved_length} chars")
-                    
-                    # Check if changes were actually applied
-                    if saved_html == original_html:
-                        logger.warning("⚠️ No actual changes detected in saved HTML")
-                        return Response({
-                            'warning': 'No actual changes were applied',
-                            'analysis': ai_response.get('analysis', ''),
-                            'line_changes_attempted': len(ai_response.get('line_changes', [])),
-                            'original_html': original_html,
-                            'reason': 'AI may have determined no changes were needed'
-                        }, status=status.HTTP_200_OK)
-                    
-                else:
-                    # No changes to apply
-                    modified_html = website.html_content
-                    logger.info("ℹ️ No line changes to apply, returning original HTML")
-                
-            except Exception as apply_error:
-                logger.error(f"❌ Apply changes error: {apply_error}")
-                return Response({
-                    'error': f'Failed to apply changes: {str(apply_error)}',
-                    'line_changes': ai_response.get('line_changes', []),
-                    'original_html_length': len(website.html_content)
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-            elapsed_time = time.time() - start_time
-            
-            # Success response with comprehensive data
-            return Response({
-                'success': True,
-                'modified_html': modified_html,
-                'analysis': ai_response.get('analysis', 'No analysis provided'),
-                'changes_applied': len(ai_response.get('line_changes', [])),
-                'summary': ai_response.get('summary', 'No summary provided'),
-                'processing_time': round(elapsed_time, 2),
-                'line_changes': ai_response.get('line_changes', []),
-                'original_html_length': original_length,
-                'modified_html_length': len(modified_html),
-                'html_actually_changed': modified_html != original_html,
-                'database_save_verified': True,
-                'validation_warnings': validation_result.get('warnings', []) if 'validation_result' in locals() else [],
-                'changes_summary': {
-                    'lines_affected': len(ai_response.get('line_changes', [])),
-                    'total_lines_before': len(original_html.split('\n')),
-                    'total_lines_after': len(modified_html.split('\n')),
-                    'size_change': len(modified_html) - original_length
-                }
-            }, status=status.HTTP_200_OK)
-            
-        except Exception as e:
-            elapsed_time = time.time() - start_time
-            logger.error(f"❌ Line-based AI Edit failed: {str(e)}")
-            
-            return Response({
-                'error': f'Line-based AI edit failed: {str(e)}',
-                'processing_time': round(elapsed_time, 2),
-                'error_type': type(e).__name__,
-                'user_request': user_request[:100] if 'user_request' in locals() else 'Unknown'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # views.py'ye bu kapsamlı versiyonu koy:
-
-    def validate_html_structure(self, original_html, modified_html, user_request=""):
-        """Kapsamlı ve hızlı HTML yapı doğrulaması"""
-        
-        # Early exit - hiç değişiklik yoksa
-        if original_html == modified_html:
-            return {'valid': True, 'errors': [], 'warnings': []}
-        
-        errors = []
-        warnings = []
-        
-        # KAPSAMLI kritik patterns
-        critical_patterns = {
-            # Slider/Carousel structures
-            'swiper-wrapper': 'Slider wrapper',
-            'swiper-container': 'Slider container',
-            'swiper-pagination': 'Slider pagination',
-            'swiper-button': 'Slider navigation',
-            'carousel-inner': 'Bootstrap carousel',
-            'carousel-item': 'Bootstrap carousel item',
-            
-            # Form structures
-            '<form': 'Form start',
-            '</form>': 'Form end',
-            
-            # Modal structures  
-            'modal-dialog': 'Modal dialog',
-            'modal-content': 'Modal content',
-            'data-bs-toggle="modal"': 'Modal trigger',
-            'data-toggle="modal"': 'Modal trigger (old)',
-            
-            # Navigation structures
-            'navbar': 'Navigation bar',
-            'nav-item': 'Navigation item',
-            
-            # Grid/Layout structures
-            'container': 'Container layout',
-            'row': 'Grid row',
-            'col-': 'Grid column',
-            
-            # JavaScript libraries
-            '<script': 'Script tag',
-            '</script>': 'Script close',
-            
-            # CSS structures
-            '<style': 'Style tag',
-            '</style>': 'Style close'
-        }
-        
-        # Hızlı kontrol
-        for pattern, description in critical_patterns.items():
-            orig_count = original_html.count(pattern)
-            mod_count = modified_html.count(pattern)
-            
-            # Kritik yapı azaldıysa
-            if mod_count < orig_count:
-                # Silme komutu kontrol et
-                is_delete_command = any(word in user_request.lower() for word in 
-                                      ['sil', 'kaldır', 'delete', 'remove', 'çıkar'])
-                
-                # Content silme vs yapı silme ayrımı
-                if pattern in ['<form', '</form>', 'swiper-wrapper', 'modal-dialog']:
-                    # Bu patterns hiçbir zaman silinmemeli
-                    errors.append(f"CRITICAL: {description} structure broken! ({orig_count} → {mod_count})")
-                elif is_delete_command:
-                    # Normal silme işlemi
-                    warnings.append(f"INFO: {description} removed as requested ({orig_count} → {mod_count})")
-                else:
-                    # İstenmeden silme
-                    errors.append(f"WARNING: {description} accidentally removed! ({orig_count} → {mod_count})")
-        
-        # ÖZEL YAPISAL KONTROLLER
-        
-        # 1. Swiper bütünlük kontrolü
-        if 'swiper' in original_html.lower():
-            orig_containers = original_html.count('swiper-container')
-            orig_wrappers = original_html.count('swiper-wrapper')
-            mod_containers = modified_html.count('swiper-container')
-            mod_wrappers = modified_html.count('swiper-wrapper')
-            
-            # Container-wrapper eşitlik kontrolü
-            if orig_containers == orig_wrappers and mod_containers != mod_wrappers:
-                errors.append("CRITICAL: Swiper container/wrapper mismatch!")
-        
-        # 2. Form bütünlük kontrolü
-        if '<form' in original_html:
-            orig_opens = original_html.count('<form')
-            orig_closes = original_html.count('</form>')
-            mod_opens = modified_html.count('<form')
-            mod_closes = modified_html.count('</form>')
-            
-            if mod_opens != mod_closes:
-                errors.append(f"CRITICAL: Form tags unmatched! ({mod_opens} opens, {mod_closes} closes)")
-        
-        # 3. Modal bütünlük kontrolü
-        if 'modal' in original_html:
-            orig_modals = original_html.count('modal-dialog')
-            orig_triggers = original_html.count('data-bs-toggle="modal"') + original_html.count('data-toggle="modal"')
-            mod_modals = modified_html.count('modal-dialog')
-            mod_triggers = modified_html.count('data-bs-toggle="modal"') + modified_html.count('data-toggle="modal"')
-            
-            # Modal var ama trigger yok
-            if mod_modals > 0 and mod_triggers == 0:
-                warnings.append("WARNING: Modal exists but no triggers found!")
-        
-        # 4. Script/Style tag eşleşme kontrolü
-        script_pairs = [
-            ('<script', '</script>'),
-            ('<style', '</style>'),
-            ('<div', '</div>'),  # Genel div kontrolü
-        ]
-        
-        for open_tag, close_tag in script_pairs:
-            mod_opens = modified_html.count(open_tag)
-            mod_closes = modified_html.count(close_tag)
-            
-            if mod_opens != mod_closes and abs(mod_opens - mod_closes) > 1:  # 1 fark toleransı
-                errors.append(f"CRITICAL: Unmatched {open_tag}/{close_tag} tags! ({mod_opens}/{mod_closes})")
-        
-        # 5. Bootstrap component kontrolü
-        if 'bootstrap' in original_html.lower() or 'bs-' in original_html:
-            bootstrap_components = ['carousel', 'modal', 'dropdown', 'collapse', 'navbar']
-            for component in bootstrap_components:
-                if component in original_html and component not in modified_html:
-                    warnings.append(f"INFO: Bootstrap {component} component removed")
-        
-        # 6. CSS Framework kontrolü (Tailwind, Bulma, etc.)
-        css_frameworks = {
-            'flex': 'Flexbox classes',
-            'grid': 'Grid classes', 
-            'btn': 'Button classes',
-            'card': 'Card components'
-        }
-        
-        for framework, description in css_frameworks.items():
-            if framework in original_html and original_html.count(framework) > modified_html.count(framework) + 5:
-                warnings.append(f"INFO: Many {description} removed")
-        
-        return {
-            'valid': len(errors) == 0,
-            'errors': errors,
-            'warnings': warnings,
-            'critical_count': len(errors),
-            'warning_count': len(warnings),
-            'components_checked': len(critical_patterns),
-            'validation_scope': 'comprehensive'
-        }
-
 
 
     @action(detail=True, methods=['get'])
