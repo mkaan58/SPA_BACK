@@ -1113,13 +1113,30 @@ def validate_html_structure_task(self, original_html, modified_html, user_reques
         website = Website.objects.get(id=website_id, user=user)
         
         # Import validation function
-        from spa.api.views import WebsiteViewSet
-        viewset_instance = WebsiteViewSet()
-        
-        # Perform comprehensive validation
-        validation_result = viewset_instance.validate_html_structure(
-            original_html, modified_html, user_request
-        )
+        # Use validation functions from tasks
+        validation_result = {
+            'valid': True,
+            'errors': [],
+            'warnings': []
+        }
+
+        # Basic validation checks
+        critical_tags = _check_critical_tags(original_html, modified_html)
+        js_integrity = _check_javascript_integrity(original_html, modified_html)
+        css_integrity = _check_css_integrity(original_html, modified_html)
+
+        # Check if all critical tags are intact
+        if not all(tag['intact'] for tag in critical_tags.values()):
+            validation_result['valid'] = False
+            validation_result['errors'].append("Critical HTML tags are missing or unbalanced")
+
+        if not js_integrity['scripts_intact']:
+            validation_result['valid'] = False
+            validation_result['errors'].append("JavaScript blocks are corrupted")
+
+        if not css_integrity['styles_intact']:
+            validation_result['valid'] = False
+            validation_result['errors'].append("CSS blocks are corrupted")
         
         # Enhanced validation with additional checks
         additional_checks = {
