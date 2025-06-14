@@ -519,12 +519,8 @@ Example valid response:
         if ai_response['line_changes']:
             modified_html = editor.apply_line_changes(ai_response['line_changes'])
             
-            # Import validation function
-            from spa.api.views import WebsiteViewSet
-            viewset_instance = WebsiteViewSet()
-            validation_result = viewset_instance.validate_html_structure(
-                original_html, modified_html, user_request
-            )
+            # ✅ FIX: Use validation functions from tasks instead of WebsiteViewSet
+            validation_result = _perform_html_validation(original_html, modified_html, user_request)
             
             if not validation_result['valid']:
                 logger.error(f"Structure validation failed: {validation_result['errors']}")
@@ -591,6 +587,61 @@ Example valid response:
             'success': False,
             'error': str(e)
         }
+
+
+def _perform_html_validation(original_html, modified_html, user_request):
+    """
+    ✅ NEW: Comprehensive HTML validation using existing helper functions
+    """
+    validation_result = {
+        'valid': True,
+        'errors': [],
+        'warnings': []
+    }
+    
+    try:
+        # Basic checks
+        if not modified_html or not modified_html.strip():
+            validation_result['valid'] = False
+            validation_result['errors'].append("Modified HTML is empty")
+            return validation_result
+        
+        # Use existing validation functions
+        critical_tags = _check_critical_tags(original_html, modified_html)
+        js_integrity = _check_javascript_integrity(original_html, modified_html)
+        css_integrity = _check_css_integrity(original_html, modified_html)
+        
+        # Check critical tags
+        for tag, info in critical_tags.items():
+            if not info['intact']:
+                validation_result['valid'] = False
+                validation_result['errors'].append(f"Critical tag {tag} is corrupted: {info['original']} → {info['modified']}")
+        
+        # Check JavaScript integrity
+        if not js_integrity['scripts_intact']:
+            validation_result['warnings'].append(f"JavaScript blocks changed: {js_integrity['original_count']} → {js_integrity['modified_count']}")
+        
+        # Check CSS integrity
+        if not css_integrity['styles_intact']:
+            validation_result['warnings'].append(f"CSS blocks changed: {css_integrity['original_count']} → {css_integrity['modified_count']}")
+        
+        # Size sanity check
+        original_length = len(original_html)
+        modified_length = len(modified_html)
+        
+        if modified_length < original_length * 0.3:  # If shrunk by more than 70%
+            validation_result['valid'] = False
+            validation_result['errors'].append(f"HTML dramatically reduced in size: {original_length} → {modified_length}")
+        
+        logger.info(f"✅ HTML validation completed: {'VALID' if validation_result['valid'] else 'INVALID'}")
+        
+        return validation_result
+        
+    except Exception as e:
+        logger.error(f"❌ HTML validation failed: {str(e)}")
+        validation_result['valid'] = False
+        validation_result['errors'].append(f"Validation error: {str(e)}")
+        return validation_result
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def update_plan_task(self, plan_id, feedback, user_id):
