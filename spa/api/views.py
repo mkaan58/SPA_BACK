@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from spa.api.approve_plan_prompt import generate_enhanced_prompt
+from spa.api.permissions import CanAccessWebsite, CanCreateWebsite, get_user_plan_info
 from spa.models import Website, UploadedImage, WebsiteDesignPlan
 from .serializers import (
     WebsiteSerializer, 
@@ -284,7 +285,66 @@ class LineBasedAIEditor:
 
 class WebsiteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
-    pagination_class = StandardResultsSetPagination  # Pagination ekleyin    
+    pagination_class = StandardResultsSetPagination  # Pagination ekleyin  
+    permission_classes = [IsAuthenticated, CanAccessWebsite]  
+
+    def get_permissions(self):
+        """
+        View'e göre farklı permission'lar uygula
+        """
+        if self.action in ['create', 'analyze_prompt', 'approve_plan']:
+            # Website creation action'ları için CanCreateWebsite permission'ı ekle
+            permission_classes = [IsAuthenticated, CanCreateWebsite]
+        else:
+            # Diğer action'lar için standart permission'lar
+            permission_classes = [IsAuthenticated, CanAccessWebsite]
+        
+        return [permission() for permission in permission_classes]
+
+    def create(self, request, *args, **kwargs):
+        """
+        Website oluşturma - permission kontrolü ile
+        """
+        # Permission kontrolü otomatik yapılır, ama manuel kontrol de yapabilirsin
+        perms = [permission() for permission in self.get_permissions()]
+        
+        for perm in perms:
+            if not perm.has_permission(request, self):
+                # Eğer limit aşıldıysa özel mesaj döndür
+                if hasattr(request, 'limit_exceeded') and request.limit_exceeded:
+                    limit_details = getattr(request, 'limit_details', {})
+                    subscription_type = limit_details.get('subscription_type', 'free')
+                    current_count = limit_details.get('current_count', 0)
+                    max_websites = limit_details.get('max_websites', 2)
+                    
+                    # Plan önerisi mesajları
+                    upgrade_messages = {
+                        'free': "Upgrade to Basic (5 websites) or Premium (20 websites) to create more!",
+                        'basic': "Upgrade to Premium (20 websites) to create more!"
+                    }
+                    
+                    error_message = f"You've reached your {subscription_type} plan limit of {max_websites} websites."
+                    upgrade_message = upgrade_messages.get(subscription_type, "")
+                    
+                    if upgrade_message:
+                        error_message += f" {upgrade_message}"
+                    
+                    return Response({
+                        "error": error_message,
+                        "limit_exceeded": True,
+                        "subscription_type": subscription_type,
+                        "current_count": current_count,
+                        "max_websites": max_websites,
+                        "upgrade_required": subscription_type != 'premium'
+                    }, status=status.HTTP_403_FORBIDDEN)
+                
+                # Diğer permission hataları
+                return Response({
+                    "error": "You don't have permission to perform this action."
+                }, status=status.HTTP_403_FORBIDDEN)
+        
+        # Permission geçtiyse normal create işlemi
+        return super().create(request, *args, **kwargs)
 
     def get_queryset(self):
         return Website.objects.filter(user=self.request.user)
@@ -328,6 +388,7 @@ class WebsiteViewSet(viewsets.ModelViewSet):
         """Analyze user prompt and create detailed design plan - BACKGROUND VERSION"""
         serializer = AnalyzePromptSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        limit_details = getattr(request, 'limit_details', {})
         from spa.tasks import analyze_prompt_task
         try:
             # Start background task immediately
@@ -344,7 +405,8 @@ class WebsiteViewSet(viewsets.ModelViewSet):
                 return Response({
                     'plan_id': result['plan_id'],
                     'design_plan': result['design_plan'],
-                    'status': result['status']
+                    'status': result['status'],
+                    'user_limits': limit_details  # Kullanıcının limit bilgilerini ekle
                 }, status=status.HTTP_201_CREATED)
             else:
                 return Response({
@@ -356,6 +418,22 @@ class WebsiteViewSet(viewsets.ModelViewSet):
             return Response({
                 'error': f"Failed to analyze prompt: {str(e)}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'])
+    def user_plan_info(self, request):
+        """
+        Kullanıcının plan bilgilerini döndürür
+        """
+        plan_info = get_user_plan_info(request.user)
+        
+        return Response({
+            'plan_info': plan_info,
+            'checkout_urls': {
+                'basic': settings.LEMON_SQUEEZY_CHECKOUT_URL_BASIC,
+                'premium': settings.LEMON_SQUEEZY_CHECKOUT_URL_PREMIUM
+            }
+        })
+
 
     @action(detail=False, methods=['post'], url_path='update-plan/(?P<plan_id>[^/.]+)')
     def update_plan(self, request, plan_id=None):
@@ -446,176 +524,6 @@ class WebsiteViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
-    # @action(detail=False, methods=['post'], url_path='approve-plan/(?P<plan_id>[^/.]+)')
-    # def approve_plan(self, request, plan_id=None):
-    #     """Approve design plan and create website with NEW streamlined photo service"""
-        
-    #     logger.info(f"🎯 approve_plan called for plan_id: {plan_id}")
-        
-    #     try:
-    #         design_plan = WebsiteDesignPlan.objects.get(id=plan_id, user=request.user)
-    #         logger.info(f"📋 Design plan found: {design_plan.id}")
-    #     except WebsiteDesignPlan.DoesNotExist:
-    #         logger.error(f"❌ Design plan not found for id: {plan_id}")
-    #         return Response({'error': 'Design plan not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-    #     try:
-    #         from spa.utils.color_utils import ColorHarmonySystem
-            
-    #         user_theme = design_plan.design_preferences.get('theme', 'light')
-    #         primary_color = design_plan.design_preferences.get('primary_color', '#4B5EAA')
-            
-    #         # YENİ: Original prompt'u al
-    #         original_prompt = design_plan.original_prompt
-    #         logger.info(f"📝 Original prompt: {original_prompt[:100]}...")
-            
-    #         # YENİ STREAMLINED PHOTO GENERATION PIPELINE
-    #         logger.info("🚀 Starting NEW streamlined photo generation...")
-            
-    #         try:
-    #             # Step 1: Extract business context from original prompt
-    #             business_context = asyncio.run(
-    #                 direct_business_extractor.extract_business_context(original_prompt)
-    #             )
-    #             logger.info(f"✅ Business context: {business_context.get('business_type', 'unknown')}")
-                
-    #             # Step 2: Generate focused queries
-    #             section_queries = focused_query_generator.generate_section_queries(
-    #                 business_context, original_prompt
-    #             )
-    #             logger.info(f"✅ Generated queries for {len(section_queries)} sections")
-                
-    #             # Step 3: Get contextual photos
-    #             context_images = asyncio.run(
-    #                 streamlined_photo_service.get_contextual_photos(
-    #                     business_context, section_queries
-    #                 )
-    #             )
-    #             logger.info(f"✅ Retrieved {len(context_images)} contextual photos")
-                
-    #             image_generation_method = "STREAMLINED_FOCUSED_PIPELINE"
-                
-    #         except Exception as photo_error:
-    #             logger.error(f"❌ Streamlined photo generation failed: {photo_error}")
-    #             # Emergency fallback
-    #             context_images = self._get_emergency_unsplash_images(original_prompt)
-    #             image_generation_method = "EMERGENCY_FALLBACK"
-            
-    #         # Color Harmony System (mevcut kod - değişiklik yok)
-    #         color_palette = ColorHarmonySystem.generate_accessible_colors(primary_color, user_theme)
-    #         accessibility_check = ColorHarmonySystem.validate_accessibility(color_palette)
-            
-    #         # Accessibility optimization (mevcut kod - değişiklik yok)
-    #         max_attempts = 3
-    #         attempt = 0
-            
-    #         while not accessibility_check['is_accessible'] and attempt < max_attempts:
-    #             attempt += 1
-    #             logger.info(f"🔧 Adjusting colors for accessibility, attempt {attempt}")
-                
-    #             primary_rgb = ColorHarmonySystem.hex_to_rgb(primary_color)
-    #             if user_theme == 'light':
-    #                 adjusted_rgb = ColorHarmonySystem.adjust_brightness(primary_rgb, -0.2 * attempt)
-    #             else:
-    #                 adjusted_rgb = ColorHarmonySystem.adjust_brightness(primary_rgb, 0.2 * attempt)
-                
-    #             adjusted_primary = ColorHarmonySystem.rgb_to_hex(adjusted_rgb)
-    #             color_palette = ColorHarmonySystem.generate_accessible_colors(adjusted_primary, user_theme)
-    #             accessibility_check = ColorHarmonySystem.validate_accessibility(color_palette)
-
-    #         # Enhanced prompt oluştur (mevcut kod - değişiklik yok)
-    #         user_preferences = {
-    #             "theme": user_theme,
-    #             "primary_color": primary_color,
-    #             "font_type": design_plan.design_preferences.get('heading_font', 'modern'),
-    #             "website_prompt": design_plan.original_prompt,
-    #             "business_type": business_context.get('business_type', 'general_business')  # YENİ
-    #         }
-            
-    #         enhanced_prompt = generate_enhanced_prompt(
-    #             design_plan=design_plan,
-    #             context_images=context_images,
-    #             user_preferences=user_preferences,
-    #             color_palette=color_palette,
-    #             accessibility_check=accessibility_check,
-    #             image_generation_method=image_generation_method
-    #         )
-            
-    #         # Gemini'ye gönder (mevcut kod - değişiklik yok)
-    #         client = genai.Client(api_key=settings.GEMINI_API_KEY)
-    #         contents = [
-    #             types.Content(
-    #                 role="user",
-    #                 parts=[types.Part.from_text(text=enhanced_prompt)],
-    #             ),
-    #         ]
-            
-    #         generate_content_config = types.GenerateContentConfig(
-    #             response_mime_type="text/plain",
-    #         )
-            
-    #         response = client.models.generate_content(
-    #             model="gemini-2.5-flash-preview-05-20",
-    #             contents=contents,
-    #             config=generate_content_config,
-    #         )
-
-    #         # Website objesi oluştur
-    #         website_data = {
-    #             'prompt': enhanced_prompt,
-    #             'original_user_prompt': original_prompt,  # YENİ ALAN
-    #             'business_context': business_context,  # YENİ ALAN
-    #             'contact_email': design_plan.design_preferences.get('contact_email', ''),
-    #             'primary_color': color_palette['primary'],
-    #             'secondary_color': color_palette['secondary'],
-    #             'accent_color': color_palette['accent'],
-    #             'background_color': color_palette['background'],
-    #             'theme': user_theme,
-    #             'heading_font': design_plan.design_preferences.get('heading_font', 'Playfair Display'),
-    #             'body_font': design_plan.design_preferences.get('body_font', 'Inter'),
-    #             'corner_radius': design_plan.design_preferences.get('corner_radius', 8)
-    #         }
-            
-    #         website_serializer = WebsiteCreateSerializer(data=website_data, context={'request': request})
-    #         website_serializer.is_valid(raise_exception=True)
-    #         website = website_serializer.save()
-            
-    #         # HTML içeriğini temizle (mevcut kod - değişiklik yok)
-    #         content = response.text.strip()
-            
-    #         if content.startswith("```html") and "```" in content[6:]:
-    #             content = content.replace("```html", "", 1)
-    #             content = content.rsplit("```", 1)[0].strip()
-    #         elif content.startswith("```") and content.endswith("```"):
-    #             content = content[3:-3].strip()
-            
-    #         if not content.startswith("<!DOCTYPE") and not content.startswith("<html"):
-    #             content = f"<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Generated Website</title>\n</head>\n<body>\n{content}\n</body>\n</html>"
-            
-    #         website.html_content = content
-    #         website.save()
-            
-    #         design_plan.is_approved = True
-    #         design_plan.save()
-            
-    #         logger.info(f"🎉 Website created successfully: {website.id}")
-            
-    #         return Response({
-    #             'website_id': website.id,
-    #             'status': 'website_created',
-    #             'message': f'Website created with {image_generation_method}',
-    #             'context_images': context_images,
-    #             'business_context': business_context,  # YENİ
-    #             'color_palette': color_palette,
-    #             'accessibility_scores': accessibility_check['scores'],
-    #             'image_generation_method': image_generation_method
-    #         }, status=status.HTTP_201_CREATED)
-            
-    #     except Exception as e:
-    #         logger.exception(f"❌ Error creating website: {str(e)}")
-    #         return Response({
-    #             'error': f"Failed to create website: {str(e)}"
-    #         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
     @action(detail=True, methods=['post'], parser_classes=[MultiPartParser, FormParser])
@@ -964,6 +872,7 @@ class WebsiteViewSet(viewsets.ModelViewSet):
         except WebsiteDesignPlan.DoesNotExist:
             return Response({'error': 'Design plan not found'}, status=status.HTTP_404_NOT_FOUND)
         
+        limit_details = getattr(request, 'limit_details', {})
         try:
             # 🚀 Background task başlat
             from spa.tasks import create_website_optimized
@@ -979,7 +888,8 @@ class WebsiteViewSet(viewsets.ModelViewSet):
                 'status': 'processing',
                 'task_id': task.id,
                 'message': 'Website creation started in background',
-                'plan_id': plan_id
+                'plan_id': plan_id,
+                'remaining_websites': limit_details.get('remaining', 0)
             }, status=status.HTTP_202_ACCEPTED)
             
         except Exception as e:
@@ -1364,3 +1274,34 @@ class WebsiteViewSet(viewsets.ModelViewSet):
             'available': not is_taken,
             'message': 'Domain müsait' if not is_taken else 'Domain zaten kullanımda'
         })
+    
+
+def check_user_can_create_website(user):
+    """
+    Kullanıcının website oluşturup oluşturamayacağını kontrol eder
+    """
+    plan_info = get_user_plan_info(user)
+    return plan_info['remaining']['websites'] > 0
+
+def get_upgrade_suggestion(user):
+    """
+    Kullanıcı için upgrade önerisi döndürür
+    """
+    subscription_type = user.subscription_type
+    
+    suggestions = {
+        'free': {
+            'message': 'Upgrade to Basic for 5 websites or Premium for 20 websites!',
+            'plans': ['basic', 'premium']
+        },
+        'basic': {
+            'message': 'Upgrade to Premium for 20 websites!',
+            'plans': ['premium']
+        },
+        'premium': {
+            'message': 'You are already on the highest plan!',
+            'plans': []
+        }
+    }
+    
+    return suggestions.get(subscription_type, suggestions['free'])

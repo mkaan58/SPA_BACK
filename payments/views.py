@@ -1,0 +1,576 @@
+# payments/views.py
+import json
+import hmac
+import hashlib
+import logging
+from datetime import datetime
+from decimal import Decimal
+
+from django.conf import settings
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.utils import timezone
+from django.db import transaction
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework import status
+
+from .models import Subscription, Payment
+from .serializers import SubscriptionSerializer, PaymentSerializer, SubscriptionDetailSerializer
+from users.models import User
+
+logger = logging.getLogger(__name__)
+
+class SubscriptionDetailView(APIView):
+    """
+    Kullanıcının abonelik bilgilerini döndürür
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            subscription = Subscription.objects.get(user=request.user)
+            serializer = SubscriptionDetailSerializer(subscription)
+            
+            # Kullanıcının abonelik tipi bilgisini ekle
+            data = serializer.data
+            data['subscription_type'] = request.user.subscription_type
+            
+            # Plan durumlarını ekle
+            data['is_basic'] = request.user.subscription_type == 'basic'
+            data['is_premium'] = request.user.subscription_type == 'premium'
+            data['is_free'] = request.user.subscription_type == 'free'
+            
+            # Plan limitlerini ekle
+            data['plan_limits'] = self._get_plan_limits(request.user.subscription_type)
+            
+            # Checkout URL'lerini ekle
+            data['checkout_urls'] = {
+                'basic': settings.LEMON_SQUEEZY_CHECKOUT_URL_BASIC,
+                'premium': settings.LEMON_SQUEEZY_CHECKOUT_URL_PREMIUM
+            }
+            
+            return Response(data)
+        except Subscription.DoesNotExist:
+            # Kullanıcının henüz aboneliği yoksa, temel bilgileri döndür
+            return Response({
+                'subscription_type': request.user.subscription_type,
+                'is_basic': request.user.subscription_type == 'basic',
+                'is_premium': request.user.subscription_type == 'premium',
+                'is_free': request.user.subscription_type == 'free',
+                'status': None,
+                'plan_limits': self._get_plan_limits(request.user.subscription_type),
+                'checkout_urls': {
+                    'basic': settings.LEMON_SQUEEZY_CHECKOUT_URL_BASIC,
+                    'premium': settings.LEMON_SQUEEZY_CHECKOUT_URL_PREMIUM
+                }
+            })
+    
+    def _get_plan_limits(self, subscription_type):
+        """Plan limitlerini döndürür"""
+        limits = {
+            'free': {'websites': 2},
+            'basic': {'websites': 5},
+            'premium': {'websites': 20}
+        }
+        return limits.get(subscription_type, limits['free'])
+
+class PaymentHistoryView(APIView):
+    """
+    Kullanıcının ödeme geçmişini döndürür
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        payments = Payment.objects.filter(user=request.user).order_by('-payment_date')
+        serializer = PaymentSerializer(payments, many=True)
+        return Response(serializer.data)
+
+@csrf_exempt
+@require_POST
+def lemon_squeezy_webhook(request):
+    """
+    Lemon Squeezy webhook endpoint'i
+    """
+    # Webhook imzasını doğrulama
+    signature = request.headers.get('X-Signature')
+    webhook_secret = settings.LEMON_SQUEEZY_WEBHOOK_SECRET
+    
+    if not signature or not webhook_secret:
+        logger.error("Webhook signature or secret is missing")
+        return HttpResponse(status=401)
+    
+    # Webhook gövdesi
+    payload = request.body
+    
+    # İmza doğrulama
+    computed_signature = hmac.new(
+        webhook_secret.encode('utf-8'),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+    
+    if not hmac.compare_digest(signature, computed_signature):
+        logger.error("Webhook signature verification failed")
+        return HttpResponse(status=401)
+    
+    try:
+        # JSON webhook verisini parse et
+        event_data = json.loads(payload.decode('utf-8'))
+        event_name = event_data.get('meta', {}).get('event_name')
+        
+        logger.info(f"Received webhook event: {event_name}")
+        
+        # Event'e göre işlem yap
+        if event_name == 'subscription_created':
+            handle_subscription_created(event_data)
+        elif event_name == 'subscription_updated':
+            handle_subscription_updated(event_data)
+        elif event_name == 'subscription_cancelled':
+            handle_subscription_cancelled(event_data)
+        elif event_name == 'subscription_expired':
+            handle_subscription_expired(event_data)
+        elif event_name == 'subscription_resumed':
+            handle_subscription_resumed(event_data)
+        elif event_name == 'subscription_paused':
+            handle_subscription_paused(event_data)
+        elif event_name == 'subscription_unpaused':
+            handle_subscription_unpaused(event_data)
+        elif event_name == 'order_created':
+            handle_order_created(event_data)
+        elif event_name == 'order_refunded':
+            handle_order_refunded(event_data)
+        
+        return HttpResponse(status=200)
+    except json.JSONDecodeError:
+        logger.error("Invalid JSON in webhook payload")
+        return HttpResponse(status=400)
+    except Exception as e:
+        logger.error(f"Error processing webhook: {str(e)}")
+        return HttpResponse(status=500)
+
+def determine_subscription_type(product_id):
+    """
+    Product ID'ye göre abonelik tipini belirler
+    """
+    basic_product_id = settings.LEMON_SQUEEZY_BASIC_PRODUCT_ID
+    premium_product_id = settings.LEMON_SQUEEZY_PREMIUM_PRODUCT_ID
+    
+    if product_id == basic_product_id:
+        return 'basic'
+    elif product_id == premium_product_id:
+        return 'premium'
+    else:
+        # Bilinmeyen product ID, premium yap güvenli olsun
+        logger.warning(f"Unknown product ID: {product_id}, defaulting to premium")
+        return 'premium'
+
+@transaction.atomic
+def handle_subscription_created(event_data):
+    """
+    Yeni abonelik oluşturulduğunda çağrılır
+    """
+    data = event_data.get('data', {}).get('attributes', {})
+    
+    # Kullanıcı email'i al
+    user_email = data.get('user_email')
+    if not user_email:
+        logger.error("No email found in subscription_created webhook")
+        return
+    
+    try:
+        # Kullanıcıyı bul
+        user = User.objects.get(email=user_email)
+        
+        # Abonelik bilgilerini al
+        lemon_subscription_id = event_data.get('data', {}).get('id')
+        lemon_customer_id = data.get('customer_id')
+        lemon_order_id = data.get('order_id')
+        lemon_product_id = data.get('product_id')
+        lemon_variant_id = data.get('variant_id')
+        
+        # Product ID'ye göre subscription type belirle
+        subscription_type = determine_subscription_type(lemon_product_id)
+        
+        # Tarih bilgilerini parse et
+        renews_at = parse_datetime(data.get('renews_at'))
+        ends_at = parse_datetime(data.get('ends_at'))
+        trial_ends_at = parse_datetime(data.get('trial_ends_at'))
+        
+        # Kart bilgileri
+        card_brand = data.get('card_brand')
+        card_last_four = data.get('card_last_four')
+        
+        # URL'ler
+        urls = data.get('urls', {})
+        update_payment_url = urls.get('update_payment_method')
+        
+        # Abonelik statüsü
+        status = data.get('status')
+        
+        # Abonelik oluştur veya güncelle
+        subscription, created = Subscription.objects.update_or_create(
+            user=user,
+            defaults={
+                'lemon_squeezy_subscription_id': lemon_subscription_id,
+                'lemon_squeezy_customer_id': lemon_customer_id,
+                'lemon_squeezy_order_id': lemon_order_id,
+                'lemon_squeezy_product_id': lemon_product_id,
+                'lemon_squeezy_variant_id': lemon_variant_id,
+                'status': status,
+                'is_trial': bool(trial_ends_at),
+                'trial_ends_at': trial_ends_at,
+                'renews_at': renews_at,
+                'ends_at': ends_at,
+                'card_brand': card_brand,
+                'card_last_four': card_last_four,
+                'update_payment_url': update_payment_url,
+            }
+        )
+        
+        # Kullanıcıyı belirlenen plana yükselt
+        user.subscription_type = subscription_type
+        user.subscription_expiry = ends_at or renews_at
+        user.save(update_fields=['subscription_type', 'subscription_expiry'])
+        
+        logger.info(f"Subscription created for user: {user.email}, type: {subscription_type}, status: {status}")
+        
+    except User.DoesNotExist:
+        logger.error(f"User not found for email: {user_email}")
+    except Exception as e:
+        logger.error(f"Error processing subscription_created: {str(e)}")
+
+@transaction.atomic
+def handle_subscription_updated(event_data):
+    """
+    Abonelik güncellendiğinde çağrılır
+    """
+    data = event_data.get('data', {}).get('attributes', {})
+    lemon_subscription_id = event_data.get('data', {}).get('id')
+    
+    if not lemon_subscription_id:
+        logger.error("No subscription ID found in subscription_updated webhook")
+        return
+    
+    try:
+        # Aboneliği bul
+        subscription = Subscription.objects.get(lemon_squeezy_subscription_id=lemon_subscription_id)
+        user = subscription.user
+        
+        # Yeni product ID varsa subscription type'ı güncelle
+        lemon_product_id = data.get('product_id')
+        if lemon_product_id:
+            subscription_type = determine_subscription_type(lemon_product_id)
+        else:
+            # Product ID yoksa mevcut subscription type'ı koru
+            subscription_type = user.subscription_type
+        
+        # Tarih bilgilerini parse et
+        renews_at = parse_datetime(data.get('renews_at'))
+        ends_at = parse_datetime(data.get('ends_at'))
+        trial_ends_at = parse_datetime(data.get('trial_ends_at'))
+        
+        # Kart bilgileri
+        card_brand = data.get('card_brand')
+        card_last_four = data.get('card_last_four')
+        
+        # URL'ler
+        urls = data.get('urls', {})
+        update_payment_url = urls.get('update_payment_method')
+        
+        # Abonelik statüsü
+        status = data.get('status')
+        
+        # Aboneliği güncelle
+        if lemon_product_id:
+            subscription.lemon_squeezy_product_id = lemon_product_id
+        subscription.status = status
+        subscription.is_trial = bool(trial_ends_at)
+        subscription.trial_ends_at = trial_ends_at
+        subscription.renews_at = renews_at
+        subscription.ends_at = ends_at
+        subscription.card_brand = card_brand
+        subscription.card_last_four = card_last_four
+        subscription.update_payment_url = update_payment_url
+        subscription.save()
+        
+        # Kullanıcı abonelik tipini ve bitiş tarihini güncelle
+        if status == 'active':
+            user.subscription_type = subscription_type
+            user.subscription_expiry = ends_at or renews_at
+        else:
+            user.subscription_type = 'free'
+            user.subscription_expiry = None
+            
+        user.save(update_fields=['subscription_type', 'subscription_expiry'])
+        
+        logger.info(f"Subscription updated for user: {user.email}, type: {subscription_type}, status: {status}")
+        
+    except Subscription.DoesNotExist:
+        logger.error(f"Subscription not found for ID: {lemon_subscription_id}")
+    except Exception as e:
+        logger.error(f"Error processing subscription_updated: {str(e)}")
+
+@transaction.atomic
+def handle_subscription_cancelled(event_data):
+    """
+    Abonelik iptal edildiğinde çağrılır
+    """
+    data = event_data.get('data', {}).get('attributes', {})
+    lemon_subscription_id = event_data.get('data', {}).get('id')
+    
+    if not lemon_subscription_id:
+        logger.error("No subscription ID found in subscription_cancelled webhook")
+        return
+    
+    try:
+        # Aboneliği bul
+        subscription = Subscription.objects.get(lemon_squeezy_subscription_id=lemon_subscription_id)
+        user = subscription.user
+        
+        # Abonelik statüsünü güncelle
+        subscription.status = 'cancelled'
+        subscription.ends_at = parse_datetime(data.get('ends_at'))
+        subscription.save()
+        
+        # Kullanıcı abonelik expiry tarihini güncelle ama tipini değiştirme
+        # Ödenen süre bitene kadar mevcut plan kalır
+        user.subscription_expiry = subscription.ends_at
+        user.save(update_fields=['subscription_expiry'])
+        
+        logger.info(f"Subscription cancelled for user: {user.email}, ends at: {subscription.ends_at}")
+        
+    except Subscription.DoesNotExist:
+        logger.error(f"Subscription not found for ID: {lemon_subscription_id}")
+    except Exception as e:
+        logger.error(f"Error processing subscription_cancelled: {str(e)}")
+
+@transaction.atomic
+def handle_subscription_expired(event_data):
+    """
+    Abonelik sona erdiğinde çağrılır
+    """
+    data = event_data.get('data', {}).get('attributes', {})
+    lemon_subscription_id = event_data.get('data', {}).get('id')
+    
+    if not lemon_subscription_id:
+        logger.error("No subscription ID found in subscription_expired webhook")
+        return
+    
+    try:
+        # Aboneliği bul
+        subscription = Subscription.objects.get(lemon_squeezy_subscription_id=lemon_subscription_id)
+        user = subscription.user
+        
+        # Abonelik statüsünü güncelle
+        subscription.status = 'expired'
+        subscription.ends_at = timezone.now()
+        subscription.save()
+        
+        # Kullanıcıyı free'ye düşür
+        user.subscription_type = 'free'
+        user.subscription_expiry = None
+        user.save(update_fields=['subscription_type', 'subscription_expiry'])
+        
+        logger.info(f"Subscription expired for user: {user.email}, downgraded to free")
+        
+    except Subscription.DoesNotExist:
+        logger.error(f"Subscription not found for ID: {lemon_subscription_id}")
+    except Exception as e:
+        logger.error(f"Error processing subscription_expired: {str(e)}")
+
+@transaction.atomic
+def handle_subscription_resumed(event_data):
+    """
+    İptal edilmiş abonelik devam ettirildiğinde çağrılır
+    """
+    data = event_data.get('data', {}).get('attributes', {})
+    lemon_subscription_id = event_data.get('data', {}).get('id')
+    
+    if not lemon_subscription_id:
+        logger.error("No subscription ID found in subscription_resumed webhook")
+        return
+    
+    try:
+        # Aboneliği bul
+        subscription = Subscription.objects.get(lemon_squeezy_subscription_id=lemon_subscription_id)
+        user = subscription.user
+        
+        # Mevcut product ID'ye göre subscription type belirle
+        subscription_type = determine_subscription_type(subscription.lemon_squeezy_product_id)
+        
+        # Tarih bilgilerini parse et
+        renews_at = parse_datetime(data.get('renews_at'))
+        ends_at = parse_datetime(data.get('ends_at'))
+        
+        # Abonelik statüsünü güncelle
+        subscription.status = 'active'
+        subscription.renews_at = renews_at
+        subscription.ends_at = ends_at
+        subscription.save()
+        
+        # Kullanıcıyı tekrar uygun plana yükselt
+        user.subscription_type = subscription_type
+        user.subscription_expiry = ends_at or renews_at
+        user.save(update_fields=['subscription_type', 'subscription_expiry'])
+        
+        logger.info(f"Subscription resumed for user: {user.email}, type: {subscription_type}")
+        
+    except Subscription.DoesNotExist:
+        logger.error(f"Subscription not found for ID: {lemon_subscription_id}")
+    except Exception as e:
+        logger.error(f"Error processing subscription_resumed: {str(e)}")
+
+@transaction.atomic
+def handle_subscription_paused(event_data):
+    """
+    Abonelik duraklatıldığında çağrılır
+    """
+    data = event_data.get('data', {}).get('attributes', {})
+    lemon_subscription_id = event_data.get('data', {}).get('id')
+    
+    if not lemon_subscription_id:
+        logger.error("No subscription ID found in subscription_paused webhook")
+        return
+    
+    try:
+        # Aboneliği bul
+        subscription = Subscription.objects.get(lemon_squeezy_subscription_id=lemon_subscription_id)
+        
+        # Abonelik statüsünü güncelle
+        subscription.status = 'paused'
+        subscription.save()
+        
+        logger.info(f"Subscription paused for user: {subscription.user.email}")
+        
+    except Subscription.DoesNotExist:
+        logger.error(f"Subscription not found for ID: {lemon_subscription_id}")
+    except Exception as e:
+        logger.error(f"Error processing subscription_paused: {str(e)}")
+
+@transaction.atomic
+def handle_subscription_unpaused(event_data):
+    """
+    Abonelik duraklatması kaldırıldığında çağrılır
+    """
+    data = event_data.get('data', {}).get('attributes', {})
+    lemon_subscription_id = event_data.get('data', {}).get('id')
+    
+    if not lemon_subscription_id:
+        logger.error("No subscription ID found in subscription_unpaused webhook")
+        return
+    
+    try:
+        # Aboneliği bul
+        subscription = Subscription.objects.get(lemon_squeezy_subscription_id=lemon_subscription_id)
+        
+        # Abonelik statüsünü güncelle
+        subscription.status = 'active'
+        subscription.save()
+        
+        logger.info(f"Subscription unpaused for user: {subscription.user.email}")
+        
+    except Subscription.DoesNotExist:
+        logger.error(f"Subscription not found for ID: {lemon_subscription_id}")
+    except Exception as e:
+        logger.error(f"Error processing subscription_unpaused: {str(e)}")
+
+@transaction.atomic
+def handle_order_created(event_data):
+    """
+    Yeni bir sipariş oluşturulduğunda çağrılır
+    """
+    data = event_data.get('data', {}).get('attributes', {})
+    
+    # Kullanıcı email'i al
+    user_email = data.get('user_email')
+    if not user_email:
+        logger.error("No email found in order_created webhook")
+        return
+    
+    try:
+        # Kullanıcıyı bul
+        user = User.objects.get(email=user_email)
+        
+        # Sipariş bilgilerini al
+        lemon_order_id = event_data.get('data', {}).get('id')
+        order_item = data.get('first_order_item', {})
+        lemon_order_item_id = order_item.get('id')
+        
+        # Fiyat ve para birimi
+        amount = Decimal(data.get('total', 0)) / 100  # Cent'ten dolar'a çevir
+        currency = data.get('currency', 'USD')
+        
+        # URL'ler
+        urls = data.get('urls', {})
+        receipt_url = urls.get('receipt')
+        
+        # Ödeme oluştur
+        payment = Payment.objects.create(
+            user=user,
+            lemon_squeezy_order_id=lemon_order_id,
+            lemon_squeezy_order_item_id=lemon_order_item_id,
+            amount=amount,
+            currency=currency,
+            status='completed',
+            receipt_url=receipt_url,
+            payment_date=timezone.now()
+        )
+        
+        # Abonelik varsa ilişkilendir
+        try:
+            subscription = user.subscription
+            payment.subscription = subscription
+            payment.save()
+        except Subscription.DoesNotExist:
+            pass
+        
+        logger.info(f"Order created for user: {user.email}, amount: {amount} {currency}")
+        
+    except User.DoesNotExist:
+        logger.error(f"User not found for email: {user_email}")
+    except Exception as e:
+        logger.error(f"Error processing order_created: {str(e)}")
+
+@transaction.atomic
+def handle_order_refunded(event_data):
+    """
+    Sipariş iade edildiğinde çağrılır
+    """
+    data = event_data.get('data', {}).get('attributes', {})
+    lemon_order_id = event_data.get('data', {}).get('id')
+    
+    if not lemon_order_id:
+        logger.error("No order ID found in order_refunded webhook")
+        return
+    
+    try:
+        # Ödemeyi bul
+        payment = Payment.objects.get(lemon_squeezy_order_id=lemon_order_id)
+        
+        # Ödeme durumunu güncelle
+        payment.status = 'refunded'
+        payment.save()
+        
+        logger.info(f"Order refunded for user: {payment.user.email}, order ID: {lemon_order_id}")
+        
+    except Payment.DoesNotExist:
+        logger.error(f"Payment not found for order ID: {lemon_order_id}")
+    except Exception as e:
+        logger.error(f"Error processing order_refunded: {str(e)}")
+
+def parse_datetime(date_str):
+    """
+    ISO format tarih string'ini datetime objesine çevirir
+    """
+    if not date_str:
+        return None
+    
+    try:
+        return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+    except (ValueError, TypeError):
+        return None

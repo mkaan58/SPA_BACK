@@ -22,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email', 'name', 'surname', 'phone_number', 'date_joined', 
-                 'email_verified', 'social_provider', 'has_password', 'has_social_login']
+                 'email_verified', 'social_provider', 'has_password', 'has_social_login', 'subscription_type', 'subscription_expiry']
         read_only_fields = ['id', 'date_joined', 'email_verified', 'has_password', 'has_social_login']
     
     def get_has_password(self, obj):

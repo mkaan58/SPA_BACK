@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'spa.apps.SpaConfig',
     'deployment.apps.DeploymentConfig',
+    'payments.apps.PaymentsConfig',
     'celery',
     'django_redis',
 
