@@ -50,21 +50,23 @@ DATABASES = {
 
 # CORS settings - Tam URL'ler ile
 CORS_ALLOWED_ORIGINS = [
+    'https://rushy.app',
+    'https://www.rushy.app',
     'https://spa-front-o0yw.onrender.com',
     'http://localhost:3000',
     'http://localhost:8000',
     'https://my-backend-app-un2d.onrender.com',
-    'https://www.rushy.app',
-    'https://rushy.app',
+
 ]
 # CORS settings - Tam URL'ler ile
 CSRF_TRUSTED_ORIGINS = [
+    'https://rushy.app',
+    'https://www.rushy.app',
     'https://spa-front-o0yw.onrender.com',
     'http://localhost:3000',
     'http://localhost:8000',
     'https://my-backend-app-un2d.onrender.com'
-    'https://www.rushy.app',
-    'https://rushy.app',
+
 ]
 # Eğer environment variable'dan geliyorsa
 if os.environ.get('CORS_ALLOWED_ORIGINS'):
