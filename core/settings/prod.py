@@ -11,7 +11,9 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     '.onrender.com',
-    'spa-front-o0yw.onrender.com'  # Frontend domain
+    'spa-front-o0yw.onrender.com',  # Frontend domain
+    'www.rushy.app',
+    'rushy.app',
 ]
 
 # Static files
@@ -51,7 +53,9 @@ CORS_ALLOWED_ORIGINS = [
     'https://spa-front-o0yw.onrender.com',
     'http://localhost:3000',
     'http://localhost:8000',
-    'https://my-backend-app-un2d.onrender.com'
+    'https://my-backend-app-un2d.onrender.com',
+    'www.rushy.app',
+    'rushy.app',
 ]
 # CORS settings - Tam URL'ler ile
 CSRF_TRUSTED_ORIGINS = [
@@ -59,6 +63,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:8000',
     'https://my-backend-app-un2d.onrender.com'
+    'www.rushy.app',
+    'rushy.app',
 ]
 # Eğer environment variable'dan geliyorsa
 if os.environ.get('CORS_ALLOWED_ORIGINS'):
