@@ -53,8 +53,6 @@ CORS_ALLOWED_ORIGINS = [
     'https://rushy.app',
     'https://www.rushy.app',
     'https://spa-front-o0yw.onrender.com',
-    'http://localhost:3000',
-    'http://localhost:8000',
     'https://my-backend-app-un2d.onrender.com',
 
 ]
@@ -72,11 +70,11 @@ CSRF_TRUSTED_ORIGINS = [
 if os.environ.get('CORS_ALLOWED_ORIGINS'):
     CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS').split(',')
 
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = False
 CORS_ALLOW_ALL_ORIGINS = False  # Production'da False olmalı
 
 # HTTPS settings
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Render proxy desteği
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -85,13 +83,12 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
-SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
 
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_SESSION_COOKIE_AGE = 1209600  # 2 hafta (saniye cinsinden)
 
 # Frontend URL
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://www.rushy.app')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://rushy.app')
 
 # Celery ayarları
 CELERY_BROKER_URL = os.environ.get('REDIS_URL')
