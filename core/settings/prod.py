@@ -54,8 +54,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:8000',
     'https://my-backend-app-un2d.onrender.com',
-    'www.rushy.app',
-    'rushy.app',
+    'https://www.rushy.app',
+    'https://rushy.app',
 ]
 # CORS settings - Tam URL'ler ile
 CSRF_TRUSTED_ORIGINS = [
@@ -63,8 +63,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:8000',
     'https://my-backend-app-un2d.onrender.com'
-    'www.rushy.app',
-    'rushy.app',
+    'https://www.rushy.app',
+    'https://rushy.app',
 ]
 # Eğer environment variable'dan geliyorsa
 if os.environ.get('CORS_ALLOWED_ORIGINS'):
@@ -88,7 +88,7 @@ ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_SESSION_COOKIE_AGE = 1209600  # 2 hafta (saniye cinsinden)
 
 # Frontend URL
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://spa-front-o0yw.onrender.com')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://www.rushy.app')
 
 # Celery ayarları
 CELERY_BROKER_URL = os.environ.get('REDIS_URL')
