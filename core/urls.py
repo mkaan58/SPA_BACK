@@ -9,5 +9,6 @@ urlpatterns = [
     path('api/spa/', include('spa.api.urls')),  
     path('api/deployment/', include('deployment.api.urls')),
     path('api/payments/',include('payments.urls')),
+    path('accounts/', include('allauth.urls')),
 ]
 
