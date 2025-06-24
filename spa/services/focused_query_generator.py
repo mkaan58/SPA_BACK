@@ -231,4 +231,12 @@ CRITICAL:
         return result if result else "business"
 
 # Singleton instance
-focused_query_generator = FocusedQueryGenerator()
+_query_generator_instance = None
+
+def get_focused_query_generator():
+    global _query_generator_instance
+    if _query_generator_instance is None:
+        _query_generator_instance = FocusedQueryGenerator()
+    return _query_generator_instance
+
+# focused_query_generator = FocusedQueryGenerator()

@@ -40,9 +40,12 @@ def create_website_optimized(self, plan_id, user_id):
         from spa.api.serializers import WebsiteCreateSerializer
         from spa.utils.color_utils import ColorHarmonySystem
         from spa.api.approve_plan_prompt import generate_enhanced_prompt
-        from spa.services.direct_business_extractor import direct_business_extractor
-        from spa.services.focused_query_generator import focused_query_generator
-        from spa.services.streamlined_photo_service import streamlined_photo_service
+        # from spa.services.direct_business_extractor import direct_business_extractor
+        # from spa.services.focused_query_generator import focused_query_generator
+        # from spa.services.streamlined_photo_service import streamlined_photo_service
+        from spa.services.direct_business_extractor import get_direct_business_extractor
+        from spa.services.focused_query_generator import get_focused_query_generator
+        from spa.services.streamlined_photo_service import get_streamlined_photo_service
         
         # Get design plan
         design_plan = WebsiteDesignPlan.objects.get(id=plan_id, user_id=user_id)
@@ -65,23 +68,27 @@ def create_website_optimized(self, plan_id, user_id):
             # ✅ OPTIMIZATION 2: PARALLEL ASYNC EXECUTION
             # Run business context and color processing in parallel
             async def run_parallel_tasks():
-                # Business context (original service, no changes)
-                business_task = direct_business_extractor.extract_business_context(original_prompt)
+                # --- YENİ: Servis nesnelerini burada, ihtiyaç anında al ---
+                extractor = get_direct_business_extractor()
+                query_generator = get_focused_query_generator()
+                photo_service = get_streamlined_photo_service()
                 
-                # Color processing can run independently
-                primary_color = design_plan.design_preferences.get('primary_color', '#4B5EAA')
-                user_theme = design_plan.design_preferences.get('theme', 'light')
+                # --- DÜZELTME 1 ---
+                # Business context (artık extractor nesnesi üzerinden çağır)
+                business_task = extractor.extract_business_context(original_prompt)
                 
                 # Wait for business context
                 business_context = await business_task
                 
-                # Generate section queries (depends on business_context)
-                section_queries = focused_query_generator.generate_section_queries(
+                # --- DÜZELTME 2 ---
+                # Generate section queries (artık query_generator nesnesi üzerinden çağır)
+                section_queries = query_generator.generate_section_queries(
                     business_context, original_prompt
                 )
                 
-                # Photos (depends on both business_context and section_queries)
-                context_images = await streamlined_photo_service.get_contextual_photos(
+                # --- DÜZELTME 3 ---
+                # Photos (artık photo_service nesnesi üzerinden çağır)
+                context_images = await photo_service.get_contextual_photos(
                     business_context, section_queries
                 )
                 

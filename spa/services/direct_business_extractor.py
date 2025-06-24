@@ -159,4 +159,12 @@ Be SPECIFIC and ACTIONABLE. Avoid generic terms like "business" or "professional
         }
 
 # Singleton instance
-direct_business_extractor = DirectBusinessExtractor()
+_extractor_instance = None
+
+def get_direct_business_extractor():
+    """Singleton nesnesini sadece gerektiğinde oluşturur ve döndürür."""
+    global _extractor_instance
+    if _extractor_instance is None:
+        _extractor_instance = DirectBusinessExtractor()
+    return _extractor_instance
+# direct_business_extractor = DirectBusinessExtractor()

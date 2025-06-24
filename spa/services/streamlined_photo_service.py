@@ -452,4 +452,11 @@ CRITICAL: Return ONLY the JSON array, no other text.
             return "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop&crop=center"
 
 # Singleton instance
-streamlined_photo_service = PerfectPhotoService()
+_photo_service_instance = None
+
+def get_streamlined_photo_service():
+    global _photo_service_instance
+    if _photo_service_instance is None:
+        _photo_service_instance = PerfectPhotoService()
+    return _photo_service_instance
+# streamlined_photo_service = PerfectPhotoService()
