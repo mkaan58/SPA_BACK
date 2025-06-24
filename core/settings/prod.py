@@ -191,3 +191,45 @@ LEMON_SQUEEZY_PREMIUM_PRODUCT_ID = os.environ.get('LEMON_SQUEEZY_PREMIUM_PRODUCT
 
 LEMON_SQUEEZY_BASIC_VARIANT_ID = os.environ.get('LEMON_SQUEEZY_BASIC_VARIANT_ID')
 LEMON_SQUEEZY_PREMIUM_VARIANT_ID = os.environ.get('LEMON_SQUEEZY_PREMIUM_VARIANT_ID')  
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False, # Django'nun kendi log'larını susturma
+    
+    # Log mesajlarının nasıl formatlanacağını belirler
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s [%(levelname)s] [%(name)s:%(lineno)d] %(message)s"
+            # Örnek: 2024-06-25 10:30:00 [ERROR] [payments.views:55] Bir hata oluştu!
+        },
+    },
+    
+    # Log'ların nereye gönderileceğini belirler
+    "handlers": {
+        "console": {
+            "level": "INFO", # INFO, WARNING, ERROR, CRITICAL seviyesindeki logları yakala
+            "class": "logging.StreamHandler", # Logları terminale/konsola yazdır
+            "formatter": "verbose",
+        },
+    },
+    
+    # Hangi log'ların hangi handler'ı kullanacağını belirler
+    "root": {
+        "handlers": ["console"], # Tüm logları 'console' handler'ına gönder
+        "level": "INFO", # Projedeki tüm log'ları INFO seviyesinden itibaren yakala
+    },
+    
+    # Belirli uygulamaların log seviyesini ayrıca ayarlayabiliriz
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "payments": { # Özellikle payments uygulamasını daha detaylı izleyelim
+            "handlers": ["console"],
+            "level": "DEBUG", # DEBUG seviyesindeki en detaylı logları bile yakala
+            "propagate": False,
+        },
+    },
+}
