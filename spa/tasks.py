@@ -189,7 +189,8 @@ def create_website_optimized(self, plan_id, user_id):
         )
         
         response = client.models.generate_content(
-            model="gemini-2.5-flash-preview-05-20",
+            # model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.5-pro",
             contents=contents,
             config=generate_content_config,
         )
@@ -417,7 +418,8 @@ Do you like this plan? Would you like to change, add, or remove any sections?
         ]
         
         response = client.models.generate_content(
-            model="gemini-2.5-flash-preview-05-20",
+            # model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.5-pro",
             contents=contents,
             config=types.GenerateContentConfig(response_mime_type="text/plain"),
         )
@@ -498,7 +500,8 @@ Example valid response:
         ]
 
         response = client.models.generate_content(
-            model="gemini-2.5-flash-preview-05-20",
+            # model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.5-pro",
             contents=contents,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
@@ -697,7 +700,8 @@ UPDATED PLAN:
         ]
         
         response = client.models.generate_content(
-            model="gemini-2.5-flash-preview-05-20",
+            # model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.5-pro",
             contents=contents,
             config=types.GenerateContentConfig(response_mime_type="text/plain"),
         )
