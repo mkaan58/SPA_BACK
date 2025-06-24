@@ -40,10 +40,9 @@ import asyncio
 import json
 
 # Mevcut import'ların altına ekle
-from spa.services.direct_business_extractor import direct_business_extractor
-from spa.services.focused_query_generator import focused_query_generator
-from spa.services.streamlined_photo_service import streamlined_photo_service
-
+from spa.services.direct_business_extractor import get_direct_business_extractor
+from spa.services.focused_query_generator import get_focused_query_generator
+from spa.services.streamlined_photo_service import get_streamlined_photo_service
 from asgiref.sync import sync_to_async
 from typing import Dict, List
 
