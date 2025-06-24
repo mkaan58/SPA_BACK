@@ -594,7 +594,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-
+import requests 
 from .models import Subscription, Payment
 from .serializers import SubscriptionSerializer, PaymentSerializer, SubscriptionDetailSerializer
 from users.models import User
@@ -609,32 +609,35 @@ class SubscriptionDetailView(APIView):
     
     def get(self, request):
         try:
+            # Mevcut ücretli aboneliği bul
             subscription = Subscription.objects.get(user=request.user)
             serializer = SubscriptionDetailSerializer(subscription)
             data = serializer.data
-            data['subscription_type'] = request.user.subscription_type
-            data['is_basic'] = request.user.subscription_type == 'basic'
-            data['is_premium'] = request.user.subscription_type == 'premium'
-            data['is_free'] = request.user.subscription_type == 'free'
-            data['plan_limits'] = self._get_plan_limits(request.user.subscription_type)
-            data['checkout_urls'] = {
-                'basic': settings.LEMON_SQUEEZY_CHECKOUT_URL_BASIC,
-                'premium': settings.LEMON_SQUEEZY_CHECKOUT_URL_PREMIUM
-            }
-            return Response(data)
+            
+            # <<< GÜNCELLEME BAŞLANGICI >>>
+            # Eğer kullanıcı zaten ücretli bir plandaysa, ona yeni checkout URL'i göndermenin anlamı yok.
+            # Bu kafa karışıklığı yaratır. Bu yüzden checkout_urls'i buradan kaldırıyoruz.
+            # Plan değiştirme ve iptal işlemleri artık yeni API endpoint'leri veya customer_portal_url üzerinden yapılacak.
+            # <<< GÜNCELLEME SONU >>>
+
         except Subscription.DoesNotExist:
-            return Response({
-                'subscription_type': request.user.subscription_type,
-                'is_basic': request.user.subscription_type == 'basic',
-                'is_premium': request.user.subscription_type == 'premium',
-                'is_free': request.user.subscription_type == 'free',
+            # Kullanıcının ücretli aboneliği yoksa (free plan), yükseltme yapabilmesi için checkout URL'lerini gönder.
+            data = {
                 'status': None,
-                'plan_limits': self._get_plan_limits(request.user.subscription_type),
                 'checkout_urls': {
                     'basic': settings.LEMON_SQUEEZY_CHECKOUT_URL_BASIC,
                     'premium': settings.LEMON_SQUEEZY_CHECKOUT_URL_PREMIUM
                 }
-            })
+            }
+        
+        # Her durumda bu genel bilgileri ekle
+        data['subscription_type'] = request.user.subscription_type
+        data['is_basic'] = request.user.subscription_type == 'basic'
+        data['is_premium'] = request.user.subscription_type == 'premium'
+        data['is_free'] = request.user.subscription_type == 'free'
+        data['plan_limits'] = self._get_plan_limits(request.user.subscription_type)
+        
+        return Response(data)
     
     def _get_plan_limits(self, subscription_type):
         """Plan limitlerini döndürür"""
@@ -646,7 +649,7 @@ class SubscriptionDetailView(APIView):
         return limits.get(subscription_type, limits['free'])
 
 class PaymentHistoryView(APIView):
-    """Kullanıcının ödeme geçmişini döndürür"""
+    """Kullanıcının ödeme geçmişini döndürür. BU VIEW OLDUĞU GİBİ KALIYOR."""
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
@@ -654,6 +657,66 @@ class PaymentHistoryView(APIView):
         serializer = PaymentSerializer(payments, many=True)
         return Response(serializer.data)
 
+class CancelSubscriptionView(APIView):
+    """Kullanıcının mevcut aktif aboneliğini iptal eder."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            subscription = Subscription.objects.get(user=request.user, status='active')
+            sub_id = subscription.lemon_squeezy_subscription_id
+            
+            headers = {
+                'Authorization': f'Bearer {settings.LEMON_SQUEEZY_API_KEY}',
+                'Accept': 'application/vnd.api+json',
+                'Content-Type': 'application/vnd.api+json'
+            }
+            payload = {"data": {"type": "subscriptions", "id": str(sub_id), "attributes": {"cancelled": True}}}
+            
+            response = requests.patch(f'https://api.lemonsqueezy.com/v1/subscriptions/{sub_id}', json=payload, headers=headers)
+            response.raise_for_status()
+
+            updated_data = response.json()['data']['attributes']
+            subscription.status = 'cancelled'
+            subscription.ends_at = parse_datetime(updated_data['ends_at'])
+            subscription.save()
+            
+            return Response({'message': 'Subscription cancelled successfully.'}, status=status.HTTP_200_OK)
+        except Subscription.DoesNotExist:
+            return Response({'error': 'No active subscription found.'}, status=status.HTTP_404_NOT_FOUND)
+        except requests.RequestException as e:
+            logger.error(f"Lemon Squeezy API error while cancelling: {e}")
+            return Response({'error': 'Could not cancel subscription due to a provider issue.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ChangePlanView(APIView):
+    """Kullanıcının abonelik planını değiştirir (upgrade/downgrade)."""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        new_variant_id = request.data.get('new_variant_id')
+        if not new_variant_id:
+            return Response({'error': 'New plan variant ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            subscription = Subscription.objects.get(user=request.user, status='active')
+            sub_id = subscription.lemon_squeezy_subscription_id
+            
+            headers = {
+                'Authorization': f'Bearer {settings.LEMON_SQUEEZY_API_KEY}',
+                'Accept': 'application/vnd.api+json',
+                'Content-Type': 'application/vnd.api+json'
+            }
+            payload = {"data": {"type": "subscriptions", "id": str(sub_id), "attributes": {"variant_id": str(new_variant_id)}}}
+            
+            response = requests.patch(f'https://api.lemonsqueezy.com/v1/subscriptions/{sub_id}', json=payload, headers=headers)
+            response.raise_for_status()
+            
+            # Webhook zaten veritabanını güncelleyecek. Başarılı mesajı dönmemiz yeterli.
+            return Response({'message': 'Plan changed successfully! The changes will be reflected shortly.'}, status=status.HTTP_200_OK)
+        except Subscription.DoesNotExist:
+            return Response({'error': 'No active subscription found.'}, status=status.HTTP_404_NOT_FOUND)
+        except requests.RequestException as e:
+            logger.error(f"Lemon Squeezy API error while changing plan: {e}")
+            return Response({'error': 'Could not change plan due to a provider issue.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 # --- Webhook Ana Fonksiyonu (Tüm Olaylarla Güncellendi) ---
 @csrf_exempt
 @require_POST
@@ -772,6 +835,7 @@ def handle_subscription_created(event_data):
                 'card_brand': data.get('card_brand'),
                 'card_last_four': data.get('card_last_four'),
                 'update_payment_url': data.get('urls', {}).get('update_payment_method'),
+                'customer_portal_url': data.get('urls', {}).get('customer_portal'),
             }
         )
         
@@ -785,6 +849,8 @@ def handle_subscription_created(event_data):
         logger.exception(f"Error in handle_subscription_created: {str(e)}")
 
 
+# payments/views.py
+
 @transaction.atomic
 def handle_subscription_updated(event_data):
     """Abonelik güncellendiğinde çağrılır"""
@@ -796,6 +862,15 @@ def handle_subscription_updated(event_data):
         user = subscription.user
         data = event_data.get('data', {}).get('attributes', {})
         
+        # <-- YENİ EKLENEN BLOK BAŞLANGICI -->
+        # Webhook'tan gelen payload içinde 'urls' ve 'customer_portal' alanı var mı diye kontrol et.
+        urls = data.get('urls', {})
+        if urls and 'customer_portal' in urls:
+            # Eğer varsa, veritabanındaki abonelik nesnesinin ilgili alanını güncelle.
+            # Bu linki daha sonra frontend'e göndereceğiz.
+            subscription.customer_portal_url = urls['customer_portal']
+        # <-- YENİ EKLENEN BLOK SONU -->
+        
         lemon_product_id = data.get('product_id')
         subscription_type = determine_subscription_type(lemon_product_id or subscription.lemon_squeezy_product_id)
         
@@ -806,6 +881,8 @@ def handle_subscription_updated(event_data):
         subscription.renews_at = renews_at
         subscription.ends_at = ends_at
         if lemon_product_id: subscription.lemon_squeezy_product_id = lemon_product_id
+        
+        # customer_portal_url de dahil olmak üzere tüm değişiklikleri kaydet.
         subscription.save()
 
         if subscription.status == 'active':

@@ -32,6 +32,8 @@ class Subscription(models.Model):
     card_brand = models.CharField(max_length=50, blank=True, null=True)
     card_last_four = models.CharField(max_length=4, blank=True, null=True)
     update_payment_url = models.TextField(blank=True, null=True)
+    customer_portal_url = models.TextField(blank=True, null=True) # <-- YENİ ALAN
+
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)

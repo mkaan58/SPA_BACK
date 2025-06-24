@@ -36,7 +36,7 @@ class SubscriptionDetailSerializer(serializers.ModelSerializer):
         fields = [
             'status', 'is_trial', 'trial_ends_at', 'renews_at', 'ends_at',
             'card_brand', 'card_last_four', 'update_payment_url',
-            'created_at', 'updated_at', 'last_payment'
+            'created_at', 'updated_at', 'last_payment','customer_portal_url'
         ]
     
     def get_last_payment(self, obj):
