@@ -882,13 +882,13 @@ def generate_photos_task(self, business_context, section_queries, user_id, plan_
         user = User.objects.get(id=user_id)
         
         # Import photo services
-        from spa.services.streamlined_photo_service import streamlined_photo_service
-        from spa.services.focused_query_generator import focused_query_generator
+        from spa.services.streamlined_photo_service import get_streamlined_photo_service
+        from spa.services.focused_query_generator import get_focused_query_generator
         
         # If section_queries not provided, generate them
         if not section_queries and business_context:
             logger.info("Generating section queries from business context")
-            section_queries = focused_query_generator.generate_section_queries(
+            section_queries = get_focused_query_generator.generate_section_queries(
                 business_context, 
                 business_context.get('original_prompt', '')
             )
@@ -899,7 +899,7 @@ def generate_photos_task(self, business_context, section_queries, user_id, plan_
         # Run async photo service in sync context
         try:
             context_images = asyncio.run(
-                streamlined_photo_service.get_contextual_photos(
+                get_streamlined_photo_service.get_contextual_photos(
                     business_context, 
                     section_queries
                 )
@@ -1035,11 +1035,11 @@ def extract_business_context_task(self, prompt, user_id, cache_key=None):
        
        # Import business extractor service
        try:
-           from spa.services.direct_business_extractor import direct_business_extractor
+           from spa.services.direct_business_extractor import get_direct_business_extractor
            
            # Run async extraction in sync context
            business_context = asyncio.run(
-               direct_business_extractor.extract_business_context(prompt)
+               get_direct_business_extractor.extract_business_context(prompt)
            )
            
            logger.info(f"✅ Business context extracted: {business_context.get('business_type', 'unknown')}")
