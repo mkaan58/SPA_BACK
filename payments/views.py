@@ -803,23 +803,34 @@ def parse_datetime(date_str):
 # --- Olay (Event) Yöneticisi Fonksiyonları ---
 
 @transaction.atomic
-def handle_subscription_created(event_data):
-    """Yeni abonelik oluşturulduğunda çağrılır"""
-    data = event_data.get('data', {}).get('attributes', {})
-    user_email = data.get('user_email')
-    if not user_email: return logger.error("No email in subscription_created webhook")
-    
+def handle_subscription_created(event_data: dict):
+    """
+    Yeni bir abonelik oluşturulduğunda gelen webhook'u işler.
+    Bu fonksiyon tüm verileri eksiksiz bir şekilde veritabanına kaydeder.
+    """
     try:
+        data = event_data['data']['attributes']
+        user_email = data.get('user_email')
+
+        if not user_email:
+            logger.error("'subscription_created' webhook'unda 'user_email' bulunamadı.")
+            return
+
+        # İlgili kullanıcıyı e-posta ile bul
         user = User.objects.get(email=user_email)
-        lemon_subscription_id = event_data.get('data', {}).get('id')
+        
+        # Gerekli tüm verileri webhook'tan al
+        lemon_subscription_id = event_data['data']['id']
         lemon_product_id = data.get('product_id')
         subscription_type = determine_subscription_type(lemon_product_id)
         
-        renews_at = parse_datetime(data.get('renews_at'))
-        ends_at = parse_datetime(data.get('ends_at'))
-        trial_ends_at = parse_datetime(data.get('trial_ends_at'))
-        
-        Subscription.objects.update_or_create(
+        urls = data.get('urls', {})
+        customer_portal_url = urls.get('customer_portal')
+        update_payment_url = urls.get('update_payment_method')
+
+        # Aboneliği oluştur veya mevcutsa güncelle (idempotency için)
+        # Bu, aynı webhook'un tekrar gelmesi durumunda sisteminizi korur.
+        subscription, created = Subscription.objects.update_or_create(
             user=user,
             defaults={
                 'lemon_squeezy_subscription_id': lemon_subscription_id,
@@ -828,76 +839,103 @@ def handle_subscription_created(event_data):
                 'lemon_squeezy_product_id': lemon_product_id,
                 'lemon_squeezy_variant_id': data.get('variant_id'),
                 'status': data.get('status'),
-                'is_trial': bool(trial_ends_at),
-                'trial_ends_at': trial_ends_at,
-                'renews_at': renews_at,
-                'ends_at': ends_at,
+                'is_trial': bool(data.get('trial_ends_at')),
+                'trial_ends_at': parse_datetime(data.get('trial_ends_at')),
+                'renews_at': parse_datetime(data.get('renews_at')),
+                'ends_at': parse_datetime(data.get('ends_at')),
                 'card_brand': data.get('card_brand'),
                 'card_last_four': data.get('card_last_four'),
-                'update_payment_url': data.get('urls', {}).get('update_payment_method'),
-                'customer_portal_url': data.get('urls', {}).get('customer_portal'),
+                'update_payment_url': update_payment_url,
+                'customer_portal_url': customer_portal_url, # EN ÖNEMLİ ALAN
             }
         )
         
+        # Kullanıcı modelindeki ilgili alanları güncelle
         user.subscription_type = subscription_type
-        user.subscription_expiry = ends_at or renews_at
+        # Abonelik bitiş tarihi "ends_at" veya bir sonraki yenilenme "renews_at" olabilir.
+        user.subscription_expiry = subscription.ends_at or subscription.renews_at
         user.save(update_fields=['subscription_type', 'subscription_expiry'])
-        logger.info(f"Subscription created for {user.email}, type: {subscription_type}")
+        
+        log_action = "oluşturuldu" if created else "güncellendi"
+        logger.info(f"Abonelik {user.email} için başarıyla {log_action}. Plan: {subscription_type}")
+
     except User.DoesNotExist:
-        logger.error(f"User not found for email: {user_email}")
+        logger.error(f"'subscription_created': {user_email} e-postasına sahip kullanıcı bulunamadı.")
+    except KeyError as e:
+        logger.error(f"'subscription_created' webhook verisinde eksik anahtar: {e}")
     except Exception as e:
-        logger.exception(f"Error in handle_subscription_created: {str(e)}")
+        logger.exception(f"'handle_subscription_created' fonksiyonunda beklenmedik bir hata oluştu: {e}")
 
-
-# payments/views.py
 
 @transaction.atomic
-def handle_subscription_updated(event_data):
-    """Abonelik güncellendiğinde çağrılır"""
-    lemon_subscription_id = event_data.get('data', {}).get('id')
-    if not lemon_subscription_id: return logger.error("No ID in subscription_updated webhook")
-    
+def handle_subscription_updated(event_data: dict):
+    """
+    Mevcut bir abonelik güncellendiğinde gelen webhook'u işler.
+    Plan değişikliği, duraklatma, devam etme gibi durumları kapsar.
+    """
     try:
-        subscription = Subscription.objects.get(lemon_squeezy_subscription_id=lemon_subscription_id)
-        user = subscription.user
-        data = event_data.get('data', {}).get('attributes', {})
+        lemon_subscription_id = event_data['data']['id']
         
-        # <-- YENİ EKLENEN BLOK BAŞLANGICI -->
-        # Webhook'tan gelen payload içinde 'urls' ve 'customer_portal' alanı var mı diye kontrol et.
-        urls = data.get('urls', {})
-        if urls and 'customer_portal' in urls:
-            # Eğer varsa, veritabanındaki abonelik nesnesinin ilgili alanını güncelle.
-            # Bu linki daha sonra frontend'e göndereceğiz.
-            subscription.customer_portal_url = urls['customer_portal']
-        # <-- YENİ EKLENEN BLOK SONU -->
-        
-        lemon_product_id = data.get('product_id')
-        subscription_type = determine_subscription_type(lemon_product_id or subscription.lemon_squeezy_product_id)
-        
-        renews_at = parse_datetime(data.get('renews_at'))
-        ends_at = parse_datetime(data.get('ends_at'))
-        
-        subscription.status = data.get('status')
-        subscription.renews_at = renews_at
-        subscription.ends_at = ends_at
-        if lemon_product_id: subscription.lemon_squeezy_product_id = lemon_product_id
-        
-        # customer_portal_url de dahil olmak üzere tüm değişiklikleri kaydet.
-        subscription.save()
+        if not lemon_subscription_id:
+            logger.error("'subscription_updated' webhook'unda 'id' bulunamadı.")
+            return
 
-        if subscription.status == 'active':
+        # İlgili aboneliği ve kullanıcıyı veritabanından bul
+        # `select_related` ile fazladan veritabanı sorgusunu engelle
+        subscription = Subscription.objects.select_related('user').get(lemon_squeezy_subscription_id=lemon_subscription_id)
+        user = subscription.user
+        
+        data = event_data['data']['attributes']
+
+        # Gerekli tüm güncel verileri webhook'tan al
+        lemon_product_id = data.get('product_id', subscription.lemon_squeezy_product_id)
+        subscription_type = determine_subscription_type(lemon_product_id)
+
+        urls = data.get('urls', {})
+        
+        # Abonelik nesnesini yeni verilerle güncelle
+        subscription.lemon_squeezy_product_id = lemon_product_id
+        subscription.lemon_squeezy_variant_id = data.get('variant_id', subscription.lemon_squeezy_variant_id)
+        subscription.status = data.get('status', subscription.status)
+        subscription.is_trial = bool(data.get('trial_ends_at'))
+        subscription.trial_ends_at = parse_datetime(data.get('trial_ends_at'))
+        subscription.renews_at = parse_datetime(data.get('renews_at'))
+        subscription.ends_at = parse_datetime(data.get('ends_at'))
+        subscription.card_brand = data.get('card_brand', subscription.card_brand)
+        subscription.card_last_four = data.get('card_last_four', subscription.card_last_four)
+        
+        # URL'leri güncelle (eğer webhook'ta gelmişse)
+        if 'customer_portal' in urls:
+            subscription.customer_portal_url = urls['customer_portal']
+        if 'update_payment_method' in urls:
+            subscription.update_payment_url = urls['update_payment_method']
+        
+        # Tüm değişiklikleri veritabanına kaydet
+        subscription.save()
+        
+        # Kullanıcı modelindeki ilgili alanları güncelle
+        # Eğer abonelik aktif ise planını ve bitiş tarihini güncelle
+        if subscription.status in ['active', 'on_trial']:
             user.subscription_type = subscription_type
-            user.subscription_expiry = ends_at or renews_at
+            user.subscription_expiry = subscription.ends_at or subscription.renews_at
         else:
-            user.subscription_type = 'free'
-            user.subscription_expiry = None
-            
+            # Eğer abonelik iptal edilmiş veya süresi dolmuşsa, kullanıcının erişimi
+            # ödediği son tarihe kadar devam eder, ancak plan tipi 'free' olarak ayarlanabilir.
+            # Bu kısım iş mantığınıza göre değişebilir. Mevcut mantık, erişim sonuna kadar planı korumak.
+            # Eğer abonelik bittiğinde anında 'free' olmasını isterseniz aşağıdaki satırı aktif edin.
+            # user.subscription_type = 'free'
+            user.subscription_expiry = subscription.ends_at
+        
         user.save(update_fields=['subscription_type', 'subscription_expiry'])
-        logger.info(f"Subscription updated for {user.email}, type: {subscription_type}, status: {subscription.status}")
+
+        logger.info(f"Abonelik {user.email} için başarıyla güncellendi. Yeni durum: {subscription.status}, Plan: {subscription_type}")
+
     except Subscription.DoesNotExist:
-        logger.error(f"Subscription not found for ID: {lemon_subscription_id}")
+        logger.error(f"'subscription_updated': {lemon_subscription_id} ID'li abonelik bulunamadı.")
+    except KeyError as e:
+        logger.error(f"'subscription_updated' webhook verisinde eksik anahtar: {e}")
     except Exception as e:
-        logger.exception(f"Error in handle_subscription_updated: {str(e)}")
+        logger.exception(f"'handle_subscription_updated' fonksiyonunda beklenmedik bir hata oluştu: {e}")
 
 @transaction.atomic
 def handle_subscription_cancelled(event_data):
