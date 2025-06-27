@@ -18,6 +18,14 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
+import base64
+import os
+from io import BytesIO
+from django.core.files.base import ContentFile
+from celery import shared_task
+from PIL import Image
+from spa.models import User, Website, UploadedImage # Model importlarını kendi projenin yapısına göre düzelt
+import logging
 
 from core.celery.celery import app
 
@@ -752,130 +760,208 @@ from PIL import Image
 import requests
 from io import BytesIO
 
+# @shared_task(bind=True, max_retries=3, default_retry_delay=60)
+# def upload_image_task(self, image_data, metadata, user_id, website_id):
+#     """Background task for image upload and processing"""
+    
+#     try:
+#         # Get user and website
+#         user = User.objects.get(id=user_id)
+#         website = Website.objects.get(id=website_id, user=user)
+        
+#         # Process image data
+#         image_file = image_data.get('image_file')
+#         title = metadata.get('title', 'Uploaded Image')
+        
+#         if not image_file:
+#             raise Exception("No image file provided")
+        
+#         # Create temporary file for processing
+#         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+#             # Write image data to temp file
+#             for chunk in image_file.chunks():
+#                 temp_file.write(chunk)
+#             temp_file_path = temp_file.name
+        
+#         try:
+#             # Open and validate image
+#             with Image.open(temp_file_path) as img:
+#                 # Validate image format
+#                 if img.format not in ['JPEG', 'PNG', 'GIF', 'WEBP']:
+#                     raise Exception(f"Unsupported image format: {img.format}")
+                
+#                 # Check image size (max 10MB)
+#                 file_size = os.path.getsize(temp_file_path)
+#                 if file_size > 10 * 1024 * 1024:  # 10MB
+#                     raise Exception("Image file too large (max 10MB)")
+                
+#                 # Optimize image if needed
+#                 optimized_image = None
+#                 if file_size > 2 * 1024 * 1024:  # If larger than 2MB, optimize
+#                     logger.info(f"Optimizing large image: {file_size} bytes")
+                    
+#                     # Resize if too large
+#                     max_dimension = 1920
+#                     if img.width > max_dimension or img.height > max_dimension:
+#                         img.thumbnail((max_dimension, max_dimension), Image.Resampling.LANCZOS)
+                    
+#                     # Save optimized version
+#                     optimized_buffer = BytesIO()
+#                     img.save(optimized_buffer, format='JPEG', quality=85, optimize=True)
+#                     optimized_image = ContentFile(optimized_buffer.getvalue())
+#                     optimized_image.name = f"optimized_{image_file.name}"
+        
+#             # Create UploadedImage object
+#             if optimized_image:
+#                 uploaded_image = UploadedImage.objects.create(
+#                     user=user,
+#                     website=website,
+#                     image=optimized_image,
+#                     title=title
+#                 )
+#                 logger.info(f"✅ Optimized image uploaded: {uploaded_image.id}")
+#             else:
+#                 # Use original image
+#                 uploaded_image = UploadedImage.objects.create(
+#                     user=user,
+#                     website=website,
+#                     image=image_file,
+#                     title=title
+#                 )
+#                 logger.info(f"✅ Original image uploaded: {uploaded_image.id}")
+            
+#             # Generate thumbnail if needed (optional)
+#             try:
+#                 with Image.open(uploaded_image.image.path) as img:
+#                     # Create thumbnail
+#                     img.thumbnail((300, 300), Image.Resampling.LANCZOS)
+#                     thumb_buffer = BytesIO()
+#                     img.save(thumb_buffer, format='JPEG', quality=80)
+#                     # Could save thumbnail to a separate field if needed
+                    
+#             except Exception as thumb_error:
+#                 logger.warning(f"Thumbnail generation failed: {thumb_error}")
+#                 # Continue without thumbnail
+            
+#             return {
+#                 'success': True,
+#                 'image_id': uploaded_image.id,
+#                 'image_url': uploaded_image.image.url,
+#                 'title': uploaded_image.title,
+#                 'file_size': uploaded_image.image.size,
+#                 'optimized': optimized_image is not None
+#             }
+            
+#         finally:
+#             # Clean up temporary file
+#             if os.path.exists(temp_file_path):
+#                 os.unlink(temp_file_path)
+        
+#     except User.DoesNotExist:
+#         logger.error(f"User {user_id} not found")
+#         return {
+#             'success': False,
+#             'error': 'User not found'
+#         }
+        
+#     except Website.DoesNotExist:
+#         logger.error(f"Website {website_id} not found for user {user_id}")
+#         return {
+#             'success': False,
+#             'error': 'Website not found'
+#         }
+        
+#     except Exception as e:
+#         logger.error(f"❌ upload_image_task failed: {str(e)}")
+        
+#         # Retry on failure
+#         if self.request.retries < self.max_retries:
+#             logger.info(f"Retrying image upload, attempt {self.request.retries + 1}")
+#             raise self.retry(countdown=60, exc=e)
+        
+#         return {
+#             'success': False,
+#             'error': str(e)
+#         }
+
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
-def upload_image_task(self, image_data, metadata, user_id, website_id):
-    """Background task for image upload and processing"""
+def upload_image_task(self, image_data_serializable, metadata, user_id, website_id):
+    """Background task for image upload and processing (FIXED)"""
     
     try:
-        # Get user and website
         user = User.objects.get(id=user_id)
         website = Website.objects.get(id=website_id, user=user)
         
-        # Process image data
-        image_file = image_data.get('image_file')
+        # 1. Base64 verisini alıp tekrar binary dosyaya dönüştür.
+        image_content = base64.b64decode(image_data_serializable['content_base64'])
+        image_file = ContentFile(image_content, name=image_data_serializable['name'])
+        
         title = metadata.get('title', 'Uploaded Image')
+
+        # 2. Geçici dosya oluşturmak yerine doğrudan bellekten çalış.
+        temp_buffer = BytesIO(image_content)
         
-        if not image_file:
-            raise Exception("No image file provided")
-        
-        # Create temporary file for processing
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            # Write image data to temp file
-            for chunk in image_file.chunks():
-                temp_file.write(chunk)
-            temp_file_path = temp_file.name
-        
-        try:
-            # Open and validate image
-            with Image.open(temp_file_path) as img:
-                # Validate image format
-                if img.format not in ['JPEG', 'PNG', 'GIF', 'WEBP']:
-                    raise Exception(f"Unsupported image format: {img.format}")
+        with Image.open(temp_buffer) as img:
+            # Validate image format
+            if img.format not in ['JPEG', 'PNG', 'GIF', 'WEBP']:
+                raise Exception(f"Unsupported image format: {img.format}")
+            
+            # Dosya boyutunu al
+            file_size = len(image_content)
+            if file_size > 10 * 1024 * 1024:  # 10MB
+                raise Exception("Image file too large (max 10MB)")
+            
+            optimized_image_content = None
+            if file_size > 2 * 1024 * 1024:  # If larger than 2MB, optimize
+                logger.info(f"Optimizing large image: {file_size} bytes")
                 
-                # Check image size (max 10MB)
-                file_size = os.path.getsize(temp_file_path)
-                if file_size > 10 * 1024 * 1024:  # 10MB
-                    raise Exception("Image file too large (max 10MB)")
+                max_dimension = 1920
+                if img.width > max_dimension or img.height > max_dimension:
+                    img.thumbnail((max_dimension, max_dimension), Image.Resampling.LANCZOS)
                 
-                # Optimize image if needed
-                optimized_image = None
-                if file_size > 2 * 1024 * 1024:  # If larger than 2MB, optimize
-                    logger.info(f"Optimizing large image: {file_size} bytes")
-                    
-                    # Resize if too large
-                    max_dimension = 1920
-                    if img.width > max_dimension or img.height > max_dimension:
-                        img.thumbnail((max_dimension, max_dimension), Image.Resampling.LANCZOS)
-                    
-                    # Save optimized version
-                    optimized_buffer = BytesIO()
-                    img.save(optimized_buffer, format='JPEG', quality=85, optimize=True)
-                    optimized_image = ContentFile(optimized_buffer.getvalue())
-                    optimized_image.name = f"optimized_{image_file.name}"
-        
-            # Create UploadedImage object
-            if optimized_image:
-                uploaded_image = UploadedImage.objects.create(
-                    user=user,
-                    website=website,
-                    image=optimized_image,
-                    title=title
-                )
-                logger.info(f"✅ Optimized image uploaded: {uploaded_image.id}")
-            else:
-                # Use original image
-                uploaded_image = UploadedImage.objects.create(
-                    user=user,
-                    website=website,
-                    image=image_file,
-                    title=title
-                )
-                logger.info(f"✅ Original image uploaded: {uploaded_image.id}")
-            
-            # Generate thumbnail if needed (optional)
-            try:
-                with Image.open(uploaded_image.image.path) as img:
-                    # Create thumbnail
-                    img.thumbnail((300, 300), Image.Resampling.LANCZOS)
-                    thumb_buffer = BytesIO()
-                    img.save(thumb_buffer, format='JPEG', quality=80)
-                    # Could save thumbnail to a separate field if needed
-                    
-            except Exception as thumb_error:
-                logger.warning(f"Thumbnail generation failed: {thumb_error}")
-                # Continue without thumbnail
-            
-            return {
-                'success': True,
-                'image_id': uploaded_image.id,
-                'image_url': uploaded_image.image.url,
-                'title': uploaded_image.title,
-                'file_size': uploaded_image.image.size,
-                'optimized': optimized_image is not None
-            }
-            
-        finally:
-            # Clean up temporary file
-            if os.path.exists(temp_file_path):
-                os.unlink(temp_file_path)
-        
-    except User.DoesNotExist:
-        logger.error(f"User {user_id} not found")
+                optimized_buffer = BytesIO()
+                # Orijinal formatı korumaya çalış, PNG ise PNG olarak kaydet
+                save_format = 'PNG' if img.format == 'PNG' else 'JPEG'
+                img.save(optimized_buffer, format=save_format, quality=85, optimize=True)
+                optimized_image_content = optimized_buffer.getvalue()
+
+        # 3. Modeli kaydet
+        if optimized_image_content:
+            final_image_file = ContentFile(optimized_image_content, name=f"optimized_{image_file.name}")
+            optimized = True
+        else:
+            final_image_file = image_file
+            optimized = False
+
+        uploaded_image = UploadedImage.objects.create(
+            user=user,
+            website=website,
+            image=final_image_file,
+            title=title
+        )
+        logger.info(f"✅ Image saved to DB: {uploaded_image.id}, Optimized: {optimized}")
+
         return {
-            'success': False,
-            'error': 'User not found'
+            'success': True,
+            'image_id': uploaded_image.id,
+            'image_url': uploaded_image.image.url,
+            'title': uploaded_image.title,
+            'file_size': uploaded_image.image.size,
+            'optimized': optimized
         }
-        
-    except Website.DoesNotExist:
-        logger.error(f"Website {website_id} not found for user {user_id}")
-        return {
-            'success': False,
-            'error': 'Website not found'
-        }
-        
+            
     except Exception as e:
-        logger.error(f"❌ upload_image_task failed: {str(e)}")
-        
+        logger.error(f"❌ upload_image_task failed: {str(e)}", exc_info=True)
         # Retry on failure
-        if self.request.retries < self.max_retries:
-            logger.info(f"Retrying image upload, attempt {self.request.retries + 1}")
-            raise self.retry(countdown=60, exc=e)
-        
+        try:
+            self.retry(exc=e, countdown=int(self.default_retry_delay * (2 ** self.request.retries)))
+        except self.MaxRetriesExceededError:
+            logger.error(f"Max retries exceeded for task {self.request.id}.")
+
         return {
             'success': False,
             'error': str(e)
         }
-
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=90)
 def generate_photos_task(self, business_context, section_queries, user_id, plan_id=None):
