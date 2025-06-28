@@ -122,4 +122,4 @@ class WebsiteDesignPlan(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"Design Plan - {self.user.username} - {self.created_at.strftime('%Y-%m-%d')}"
+        return f"Design Plan - {self.user.name} - {self.created_at.strftime('%Y-%m-%d')}"
