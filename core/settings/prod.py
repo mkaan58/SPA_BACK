@@ -41,13 +41,30 @@ ALLOWED_HOSTS = [
 # }
 
 # Database
-DATABASES = {
-    'default': dj_database_url.parse(
-        os.environ.get('DATABASE_URL', 
-         'postgresql://spa_ozqv_user:ylYFYpqwh9bbFTqOh5FjBVkAX2fB5KXi@dpg-d144tsu3jp1c73d9dcpg-a.oregon-postgres.render.com/spa_ozqv')
-    )
-}
 
+# DATABASES = {
+#     'default': dj_database_url.parse(
+#         os.environ.get('DATABASE_URL', 
+#          'postgresql://spa_ozqv_user:ylYFYpqwh9bbFTqOh5FjBVkAX2fB5KXi@dpg-d144tsu3jp1c73d9dcpg-a.oregon-postgres.render.com/spa_ozqv')
+#     )
+# }
+
+DATABASES = {
+    'default': {
+
+        'ENGINE': 'django.db.backends.postgresql',
+
+        'NAME': 'spa_database_1',
+
+        'USER': 'mkaan',
+
+        'PASSWORD': 'Mm51129035.',
+
+        'HOST': 'database-1.cpgyuso0ut2p.eu-north-1.rds.amazonaws.com',
+
+        'PORT': '5432',
+    }
+}
 # CORS settings - Tam URL'ler ile
 CORS_ALLOWED_ORIGINS = [
     'https://rushy.app',
